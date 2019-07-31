@@ -1,0 +1,30 @@
+{{define "layout"}}
+<!DOCTYPE html>
+<html lang="en" class="h-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{{.}} | DropNote</title>
+    <link rel="stylesheet" href="/static/vendor/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/vendor/fontawesome/css/all.min.css">
+    {{ template "stylesheet" }}
+</head>
+<body class="d-flex flex-column h-100">
+    <header>
+        {{ template "navbar" }}
+    </header>
+    <main role="main" class="flex-shrink-0">
+        {{ template "content" }}
+    </main>
+    <footer class="footer mt-auto py-2 bg-dark">
+        <div class="container text-center">
+            <p class="m-0 text-muted">Powered by !boop</p>
+        </div>
+    </footer>
+    <script src="/static/vendor/jquery/jquery.min.js"></script>
+    <script src="/static/vendor/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/static/js/main.js"></script>
+</body>
+</html>
+{{end}}
