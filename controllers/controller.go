@@ -66,7 +66,7 @@ func DropNoteHandler(w http.ResponseWriter, r *http.Request) {
 		url := fmt.Sprintf("%snote/new", api)
 		data.Heading, data.Message = "Error!", "Spmething has gone horribly wrong"
 		if ok, voucher := postNote(url, payload); ok {
-			strOnSuccess := "Your note (%s) has been stored.\nYour code is %s.\nHere's a direct link: %s/note/%s."
+			strOnSuccess := "Your note (%s) has been stored.\nYour code is %s.\nHere's a direct link: %sdropcode?voucher=%s."
 			data.Heading, data.Message = "Success!", fmt.Sprintf(strOnSuccess, subject, voucher, site, voucher)
 		} 
 		style = filepath.Join("templates", "styles", "info.html.tmpl")
