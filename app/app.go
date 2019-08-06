@@ -18,6 +18,8 @@ func (a *App) Init() {
 	a.mux = http.NewServeMux()
 	a.mux.HandleFunc("/favicon.ico", c.FaviconHandler)
 	a.mux.HandleFunc("/home", c.IndexHandler)
+	a.mux.HandleFunc("/dropnote", c.DropNoteHandler)
+	a.mux.HandleFunc("/dropcode", c.DropCodeHandler)
 	a.mux.HandleFunc("/", c.IndexHandler)
 
 	fs := http.FileServer(http.Dir("static"))

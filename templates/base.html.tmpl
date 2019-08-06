@@ -5,9 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>{{.}} | DropNote</title>
+    <title>{{.Title}} | DropNote</title>
     <link rel="stylesheet" href="/static/vendor/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="/static/vendor/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/main.css">
     {{ template "stylesheet" }}
 </head>
 <body class="d-flex flex-column h-100">
@@ -15,7 +16,7 @@
         {{ template "navbar" }}
     </header>
     <main role="main" class="flex-shrink-0">
-        {{ template "content" }}
+        {{ template "content" .}}
     </main>
     <footer class="footer mt-auto py-2 bg-dark">
         <div class="container text-center">

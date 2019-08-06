@@ -1,0 +1,21 @@
+{{define "content"}}
+<div class="container-drop">
+
+    <div class="wrap-drop">
+        <form class="drop-form validate-form" action="/dropcode" method="POST">
+            <span class="drop-form-title">
+                Drop A Code
+            </span>
+
+            <div class="wrap-drop-input validate-input">
+                <input class="drop-input" type="text" name="voucher" placeholder="Note voucher">
+                <span class="focus-drop-input"></span>
+            </div>
+            
+            <div class="container-drop-form-btn">
+                <button class="drop-form-btn">Drop</button>
+            </div>
+        </form>
+    </div>
+</div>
+{{end}}
