@@ -55,13 +55,21 @@ func DropNoteHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		r.ParseForm()
 		subject := r.Form["subject"][0]
-		payload := note{
+		noteData := &note{
 			Subject: subject,
 			Content: r.Form["content"][0],
 		}
+
+		if isAuth && len(r.Form["shouldLink"]) > 0 {
+			if shouldLink := r.Form["shouldLink"][0]; shouldLink == "on" {
+				sessionData := session.Values["data"].(*SessionData)
+				noteData.auth = sessionData.Auth
+			}
+		}
+
 		data.Heading, data.Message = "Error!", "Something has gone horribly wrong"
-		if ok, voucher := (&payload).postNote(); ok {
-			strOnSuccess := "Your note (%s) has been stored.\nYour code is %s.\nHere's a direct link: %sdropcode?voucher=%s."
+		if ok, voucher := noteData.postNote(); ok {
+			strOnSuccess := "Your note (%s) has been stored. Your code is %s. Here's a direct link: %sdropcode?voucher=%s."
 			data.Heading, data.Message = "Success!", fmt.Sprintf(strOnSuccess, subject, voucher, site, voucher)
 		}
 		meta = filepath.Join("templates", "meta", "info.html.tmpl")
@@ -89,17 +97,8 @@ func DropCodeHandler(w http.ResponseWriter, r *http.Request) {
 		data.User = sData.Name
 	}
 
-	keys, hasGet := r.URL.Query()["voucher"]
-	hasGet = hasGet && len(keys) > 0
-
-	if r.Method == "POST" || hasGet {
-		if hasGet {
-			voucher = keys[0]
-		} else {
-			r.ParseForm()
-			voucher = r.Form["voucher"][0]
-		}
-
+	if keys, ok := r.URL.Query()["voucher"]; ok && len(keys) > 0 {
+		voucher = keys[0]
 		data.Heading, data.Message = "Error!", "Your voucher is invalid."
 		if validateCode(voucher) {
 			noteData := &note{}

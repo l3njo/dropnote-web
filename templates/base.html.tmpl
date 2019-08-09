@@ -1,7 +1,6 @@
 {{define "layout"}}
 <!DOCTYPE html>
 <html lang="en" class="h-100">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,7 +11,6 @@
     <link rel="stylesheet" href="/static/css/main.css">
     {{ template "stylesheet" }}
 </head>
-
 <body class="d-flex flex-column h-100">
     <header>
         <nav class="navbar navbar-expand-lg fixed-top navbar-dark bg-dark">
@@ -23,10 +21,10 @@
             <div class="navbar-collapse offcanvas-collapse" id="navbarsExampleDefault">
                 <ul class="navbar-nav ml-auto">
                     <li class="nav-item">
-                        <a class="nav-link {{if eq .Title "Drop Note"}} active {{end}}" href="/dropnote">Drop Note</a>
+                        <a class="nav-link {{if eq .Title "Drop Note" -}} active {{- end -}} " href="/dropnote">Drop Note</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{if eq .Title "Drop Code"}} active {{end}}" href="/dropcode">Drop Code</a>
+                        <a class="nav-link {{if eq .Title "Drop Code" -}} active {{- end -}} " href="/dropcode">Drop Code</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/apps">Apps</a>
@@ -41,11 +39,9 @@
             </div>
         </nav>
     </header>
-
     <main role="main" class="flex-shrink-0">
         {{ template "content" .}}
     </main>
-    
     <footer class="footer mt-auto py-2 bg-dark">
         <div class="container text-center">
             <p class="m-0 text-muted">Powered by !boop</p>
@@ -55,6 +51,5 @@
     <script src="/static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="/static/js/main.js"></script>
 </body>
-
 </html>
 {{end}}

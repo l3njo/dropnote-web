@@ -43,7 +43,7 @@ func loggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 		next.ServeHTTP(w, r)
-		log.Printf("%-7s%-25s\t%s", r.Method, r.RequestURI, time.Since(start))
+		log.Printf("%-6s%-57s\t%s", r.Method, r.RequestURI, time.Since(start))
 	})
 }
 

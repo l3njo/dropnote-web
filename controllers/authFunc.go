@@ -7,11 +7,6 @@ import (
 	"net/http"
 )
 
-type authData interface {
-	validate() (bool, string)
-	tryAuth() (SessionData, bool)
-}
-
 type signupData struct {
 	Name    string `json:"name"`
 	Mail    string `json:"mail"`
@@ -22,16 +17,6 @@ type signupData struct {
 type loginData struct {
 	Mail string `json:"mail"`
 	Pass string `json:"pass"`
-}
-
-func buildSession(result map[string]interface{}) (session *SessionData) {
-	session = &SessionData{}
-	resultData := result["data"].(map[string]interface{})
-	session.User = resultData["ID"].(string)
-	session.Name = resultData["name"].(string)
-	session.Mail = resultData["mail"].(string)
-	session.Auth = resultData["auth"].(string)
-	return
 }
 
 func (s *signupData) validate() (bool, string) {
@@ -61,12 +46,8 @@ func (s *signupData) tryAuth() (*SessionData, bool) {
 		return session, false
 	}
 
-	session = buildSession(result)
+	session.buildSession(result)
 	return session, true
-}
-
-func (l *loginData) validate() (bool, string) {
-	return true, ""
 }
 
 func (l *loginData) tryAuth() (*SessionData, bool) {
@@ -89,7 +70,7 @@ func (l *loginData) tryAuth() (*SessionData, bool) {
 		return session, false
 	}
 
-	session = buildSession(result)
+	session.buildSession(result)
 	return session, true
 }
 

@@ -15,6 +15,16 @@ var (
 	store = sessions.NewCookieStore(key)
 )
 
+// SessionData represents the data stored by session cookie
 type SessionData struct {
-	ID, User, Name, Mail, Auth string
+	User, Name, Mail, Auth string
+}
+
+func (s *SessionData) buildSession(result map[string]interface{}) {
+	resultData := result["data"].(map[string]interface{})
+	s.User = resultData["ID"].(string)
+	s.Name = resultData["name"].(string)
+	s.Mail = resultData["mail"].(string)
+	s.Auth = resultData["auth"].(string)
+	return
 }

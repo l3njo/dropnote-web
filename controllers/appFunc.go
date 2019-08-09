@@ -12,6 +12,7 @@ import (
 type note struct {
 	Subject string `json:"subject"`
 	Content string `json:"content"`
+	auth    string
 }
 
 func validateCode(voucher string) bool {
@@ -44,7 +45,19 @@ func (n *note) postNote() (bool, string) {
 	}
 
 	url := fmt.Sprintf("%snote/new", api)
-	resp, err := http.Post(url, "application/json", bytes.NewBuffer(requestBody))
+	request, err := http.NewRequest("POST", url, bytes.NewBuffer(requestBody))
+	request.Header.Set("Content-type", "application/json")
+	if n.auth != "" {
+		auth := fmt.Sprintf("Bearer %s", n.auth)
+		request.Header.Add("Authorization", auth)
+	}
+	
+	if err != nil {
+		return false, voucher
+	} 
+
+	// resp, err := http.Post(url, "application/json", bytes.NewBuffer(requestBody))
+	resp, err := http.DefaultClient.Do(request)
 	if err != nil {
 		return false, voucher
 	}

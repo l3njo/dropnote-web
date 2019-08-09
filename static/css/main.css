@@ -89,3 +89,43 @@ body {
         font-size: 3.5rem;
     }
 }
+
+/* Tooltip container */
+.custom-tooltip {
+  position: relative;
+  display: inline-block;
+  /* border-bottom: 1px dotted black; */
+}
+
+/* Tooltip text */
+.custom-tooltip .custom-tooltiptext {
+  visibility: hidden;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  padding: 5px 0;
+  border-radius: 6px;
+ 
+  /* Position the tooltip text */
+  position: absolute;
+  z-index: 10;
+  width: 160px;
+  top: 100%;
+  left: 50%; 
+  margin-left: -80px;
+}
+
+.custom-tooltip .custom-tooltiptext::after {
+  content: " ";
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent black transparent;
+}
+
+.custom-tooltip:hover .custom-tooltiptext {
+  visibility: visible;
+}

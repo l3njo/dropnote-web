@@ -66,10 +66,6 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			Pass: r.Form["pass"][0],
 		}
 
-		if ok, msg := payload.validate(); !ok {
-			data.Message = msg
-		}
-
 		if sData, ok := payload.tryAuth(); ok {
 			session.Values["isAuth"] = true
 			session.Values["data"] = sData
