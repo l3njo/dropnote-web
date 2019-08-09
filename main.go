@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/gob"
 	"log"
 	"os"
 	"os/signal"
@@ -8,12 +9,13 @@ import (
 
 	"github.com/joho/godotenv"
 	a "github.com/l3njo/dropnote-web/app"
+	c "github.com/l3njo/dropnote-web/controllers"
 )
 
 var (
-	app a.App
-	port string
-	signals     chan os.Signal
+	app     a.Application
+	port    string
+	signals chan os.Signal
 )
 
 func cleanup() {
@@ -39,6 +41,7 @@ func init() {
 	handle(e)
 
 	port = os.Getenv("PORT")
+	gob.Register(&c.SessionData{})
 }
 
 func main() {

@@ -1,0 +1,29 @@
+{{define "content"}}
+<div class="limiter">
+    <div class="container-auth">
+        <div class="wrap-auth">
+            <form class="auth-form" method="POST">
+                <span class="auth-form-title mb-3">Log In</span>
+                
+                <div class="wrap-auth-input  mb-3">
+                    <input class="auth-input" type="email" name="mail" placeholder="Email Address" required>
+                    <span class="focus-auth-input"></span>
+                </div>
+
+                <div class="wrap-auth-input  mb-3">
+                    <input class="auth-input" type="password" name="pass" placeholder="Password" required>
+                    <span class="focus-auth-input"></span>
+                </div>
+                
+                <div class="d-flex mb-3">
+                    <a href="/reset" class="mx-auto btn btn-link">Forgot Password?</a>
+                </div>
+
+                <div class="container-auth-form-btn mb-3">
+                    <button class="auth-form-btn">Log In</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{{end}}

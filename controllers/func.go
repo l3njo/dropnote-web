@@ -1,63 +1,51 @@
 package controllers
 
 import (
-	"bytes"
-	"encoding/json"
+	"log"
 	"net/http"
+	"path/filepath"
 
-	uuid "github.com/satori/go.uuid"
+	"github.com/gorilla/sessions"
 )
 
-type note struct{
-	subject, content string
+const (
+	site = "https://drop-note.herokuapp.com/"
+	api  = "https://dropnote-api.herokuapp.com/api/"
+)
+
+var (
+	base = filepath.Join("templates", "base.html.tmpl")
+)
+
+type info struct {
+	Title, Heading, Message, User string
 }
 
-func validate(voucher string) (isValid bool) {
-	isValid = true
-	if _, e := uuid.FromString(voucher); e != nil{
-		isValid = false
+func checkAuth(session *sessions.Session) bool {
+	if auth, ok := session.Values["isAuth"].(bool); !ok || !auth {
+		return false
 	}
-	return
+	return true
 }
 
-func getNote(url string) (note, error) {
-	data := note{}
-	resp, err := http.Get(url)
-	if err != nil {
-		return data, err
+func getMenu(isAuth bool) string {
+	if isAuth {
+		return filepath.Join("templates", "menu", "private_nav.html.tmpl")
 	}
-	defer resp.Body.Close()
-	var result map[string]interface{}
-	json.NewDecoder(resp.Body).Decode(&result)
-	resultData := result["data"].(map[string]interface{})
-	data.subject = resultData["subject"].(string)
-	data.content = resultData["content"].(string)
-	return data, nil
+	return filepath.Join("templates", "menu", "public_nav.html.tmpl")
 }
 
-func postNote(url string, n note) (bool, string) {
-	var voucher string
-	requestBody, err := json.Marshal(map[string]string{
-		"subject": n.subject,
-		"content": n.content,
-	})
-	if err != nil {
-		return false, voucher
+func getNext(r *http.Request) string {
+	nextList, ok := r.URL.Query()["next"]
+	if !ok || len(nextList[0]) < 1 {
+		return "/"
 	}
+	next := nextList[0]
+	return next
+}
 
-	resp, err := http.Post(url, "application/json", bytes.NewBuffer(requestBody))
-	if err != nil {
-		return false, voucher
+func handle(e error) {
+	if e != nil {
+		log.Println(e)
 	}
-	defer resp.Body.Close()
-
-	var result map[string]interface{}
-	json.NewDecoder(resp.Body).Decode(&result)
-	status := result["status"].(bool)
-	if status {
-		resultData := result["data"].(map[string]interface{})
-		voucher = resultData["ID"].(string)
-	}
-
-	return status, voucher
 }

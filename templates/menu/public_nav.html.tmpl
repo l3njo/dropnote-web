@@ -1,0 +1,16 @@
+{{define "menu"}}
+
+{{$next := ""}}
+{{if eq .Title "Drop Note"}} {{$next = "dropnote"}}
+{{else if eq .Title "Drop Code"}} {{$next = "dropcode"}}
+{{else if eq .Title "Apps"}} {{$next = "apps"}}
+{{end}}
+
+<a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-toggle="dropdown" aria-haspopup="true"
+    aria-expanded="false">Account</a>
+<div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown01">
+    <a class="dropdown-item" href="/login {{- if $next -}} ?next= {{- $next}} {{end}}">Log In</a>
+    <a class="dropdown-item" href="/signup {{- if $next -}} ?next= {{- $next}} {{end}}">Sign Up</a>
+</div>
+
+{{end}}

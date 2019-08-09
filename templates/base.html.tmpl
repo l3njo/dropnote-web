@@ -1,6 +1,7 @@
 {{define "layout"}}
 <!DOCTYPE html>
 <html lang="en" class="h-100">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,21 +12,49 @@
     <link rel="stylesheet" href="/static/css/main.css">
     {{ template "stylesheet" }}
 </head>
+
 <body class="d-flex flex-column h-100">
     <header>
-        {{ template "navbar" }}
+        <nav class="navbar navbar-expand-lg fixed-top navbar-dark bg-dark">
+            <a class="navbar-brand mr-auto mr-lg-0" href="/">DropNote</a>
+            <button class="navbar-toggler p-0 border-0" type="button" data-toggle="offcanvas">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="navbar-collapse offcanvas-collapse" id="navbarsExampleDefault">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link {{if eq .Title "Drop Note"}} active {{end}}" href="/dropnote">Drop Note</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{if eq .Title "Drop Code"}} active {{end}}" href="/dropcode">Drop Code</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/apps">Apps</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api">API</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        {{ template "menu" .}}
+                    </li>
+                </ul>
+            </div>
+        </nav>
     </header>
+
     <main role="main" class="flex-shrink-0">
         {{ template "content" .}}
     </main>
+    
     <footer class="footer mt-auto py-2 bg-dark">
         <div class="container text-center">
             <p class="m-0 text-muted">Powered by !boop</p>
         </div>
     </footer>
     <script src="/static/vendor/jquery/jquery.min.js"></script>
-    <script src="/static/vendor/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="/static/js/main.js"></script>
 </body>
+
 </html>
 {{end}}

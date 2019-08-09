@@ -4,22 +4,29 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	c "github.com/l3njo/dropnote-web/controllers"
 )
 
-// App represents the application
-type App struct {
-	mux *http.ServeMux
+// Application represents the application
+type Application struct {
+	mux     *http.ServeMux
+	session string
 }
 
 // Init sets up the router
-func (a *App) Init() {
+func (a *Application) Init() {
 	a.mux = http.NewServeMux()
-	a.mux.HandleFunc("/favicon.ico", c.FaviconHandler)
 	a.mux.HandleFunc("/home", c.IndexHandler)
 	a.mux.HandleFunc("/dropnote", c.DropNoteHandler)
 	a.mux.HandleFunc("/dropcode", c.DropCodeHandler)
+
+	a.mux.HandleFunc("/signup", c.SignupHandler)
+	a.mux.HandleFunc("/login", c.LoginHandler)
+	a.mux.HandleFunc("/logout", c.LogoutHandler)
+	a.mux.HandleFunc("/reset", c.ResetHandler)
+
 	a.mux.HandleFunc("/", c.IndexHandler)
 
 	fs := http.FileServer(http.Dir("static"))
@@ -27,15 +34,21 @@ func (a *App) Init() {
 }
 
 // Run starts the app
-func (a *App) Run(port string) {
+func (a *Application) Run(port string) {
 	log.Printf("Starting server on port %s.\n", port)
 	log.Fatal("ListenAndServe: ", http.ListenAndServe(":"+port, loggingMiddleware(trailingSlashesMiddleware(a.mux))))
 }
 
 func loggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Println("RequestURI:", r.RequestURI)
+		start := time.Now()
 		next.ServeHTTP(w, r)
+		log.Printf(
+			"%s\t%s\t%s",
+			r.Method,
+			r.RequestURI,
+			time.Since(start),
+		)
 	})
 }
 
