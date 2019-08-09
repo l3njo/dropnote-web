@@ -3,49 +3,47 @@ package controllers
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	uuid "github.com/satori/go.uuid"
 )
 
-type note struct{
-	subject, content string
+type note struct {
+	Subject string `json:"subject"`
+	Content string `json:"content"`
 }
 
-func validate(voucher string) (isValid bool) {
-	isValid = true
-	if _, e := uuid.FromString(voucher); e != nil{
-		isValid = false
+func validateCode(voucher string) bool {
+	if _, e := uuid.FromString(voucher); e != nil {
+		return false
 	}
-	return
+	return true
 }
 
-func getNote(url string) (note, error) {
-	data := note{}
+func (n *note) getNote(voucher string) error {
+	url := fmt.Sprintf("%snote/%s", api, voucher)
 	resp, err := http.Get(url)
 	if err != nil {
-		return data, err
+		return err
 	}
 	defer resp.Body.Close()
 	var result map[string]interface{}
 	json.NewDecoder(resp.Body).Decode(&result)
 	resultData := result["data"].(map[string]interface{})
-	data.subject = resultData["subject"].(string)
-	data.content = resultData["content"].(string)
-	return data, nil
+	n.Subject = resultData["subject"].(string)
+	n.Content = resultData["content"].(string)
+	return nil
 }
 
-func postNote(url string, n note) (bool, string) {
+func (n *note) postNote() (bool, string) {
 	var voucher string
-	// TODO Remove map
-	requestBody, err := json.Marshal(map[string]string{
-		"subject": n.subject,
-		"content": n.content,
-	}) 
+	requestBody, err := json.Marshal(n)
 	if err != nil {
 		return false, voucher
 	}
 
+	url := fmt.Sprintf("%snote/new", api)
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(requestBody))
 	if err != nil {
 		return false, voucher

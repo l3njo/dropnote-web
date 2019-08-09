@@ -3,16 +3,15 @@ package controllers
 import (
 	"fmt"
 	"html/template"
-	"log"
 	"net/http"
 	"path/filepath"
 )
 
 // IndexHandler handles the "/", "/home", "/favicon.ico" and all undefined routes.
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
-	session, _ := store.Get(r, sessionCookie)
+	session, err := store.Get(r, sessionCookie)
+	Handle(err)
 	isAuth := checkAuth(session)
-	log.Println(isAuth) // DEBUG
 	if r.URL.Path == "/favicon.ico" {
 		http.ServeFile(w, r, "static/img/favicon.ico")
 		return
@@ -34,14 +33,15 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tmpl, err := template.ParseFiles(base, menu, meta, body)
-	handle(err)
+	Handle(err)
 	tmpl.ExecuteTemplate(w, "layout", data)
 	return
 }
 
 // DropNoteHandler handles the "/dropnote" route.
 func DropNoteHandler(w http.ResponseWriter, r *http.Request) {
-	session, _ := store.Get(r, sessionCookie)
+	session, err := store.Get(r, sessionCookie)
+	Handle(err)
 	isAuth := checkAuth(session)
 	data := info{Title: "Drop Note"}
 	meta := filepath.Join("templates", "meta", "drop.html.tmpl")
@@ -56,12 +56,11 @@ func DropNoteHandler(w http.ResponseWriter, r *http.Request) {
 		r.ParseForm()
 		subject := r.Form["subject"][0]
 		payload := note{
-			subject: subject,
-			content: r.Form["content"][0],
+			Subject: subject,
+			Content: r.Form["content"][0],
 		}
-		url := fmt.Sprintf("%snote/new", api)
 		data.Heading, data.Message = "Error!", "Something has gone horribly wrong"
-		if ok, voucher := postNote(url, payload); ok {
+		if ok, voucher := (&payload).postNote(); ok {
 			strOnSuccess := "Your note (%s) has been stored.\nYour code is %s.\nHere's a direct link: %sdropcode?voucher=%s."
 			data.Heading, data.Message = "Success!", fmt.Sprintf(strOnSuccess, subject, voucher, site, voucher)
 		}
@@ -70,14 +69,15 @@ func DropNoteHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tmpl, err := template.ParseFiles(base, menu, meta, body)
-	handle(err)
+	Handle(err)
 	tmpl.ExecuteTemplate(w, "layout", data)
 	return
 }
 
 // DropCodeHandler handles the "/dropcode" route.
 func DropCodeHandler(w http.ResponseWriter, r *http.Request) {
-	session, _ := store.Get(r, sessionCookie)
+	session, err := store.Get(r, sessionCookie)
+	Handle(err)
 	isAuth := checkAuth(session)
 	var voucher string
 	data := info{Title: "Drop Code"}
@@ -101,11 +101,11 @@ func DropCodeHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		data.Heading, data.Message = "Error!", "Your voucher is invalid."
-		if validate(voucher) {
-			url := fmt.Sprintf("%snote/%s", api, voucher)
+		if validateCode(voucher) {
+			noteData := &note{}
 			data.Message = "Something has gone horribly wrong."
-			if noteData, err := getNote(url); err == nil {
-				data.Heading, data.Message = noteData.subject, noteData.content
+			if err := noteData.getNote(voucher); err == nil {
+				data.Heading, data.Message = noteData.Subject, noteData.Content
 			}
 		}
 		meta = filepath.Join("templates", "meta", "info.html.tmpl")
@@ -113,7 +113,7 @@ func DropCodeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tmpl, err := template.ParseFiles(base, menu, meta, body)
-	handle(err)
+	Handle(err)
 	tmpl.ExecuteTemplate(w, "layout", data)
 	return
 }

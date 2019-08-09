@@ -44,7 +44,8 @@ func getNext(r *http.Request) string {
 	return next
 }
 
-func handle(e error) {
+// Handle deals with top-level errors
+func Handle(e error) {
 	if e != nil {
 		log.Println(e)
 	}

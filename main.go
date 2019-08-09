@@ -22,12 +22,6 @@ func cleanup() {
 	log.Println("Shutting down server.")
 }
 
-func handle(e error) {
-	if e != nil {
-		log.Println(e)
-	}
-}
-
 func init() {
 	signals = make(chan os.Signal)
 	signal.Notify(signals, os.Interrupt, syscall.SIGTERM)
@@ -38,7 +32,7 @@ func init() {
 	}()
 
 	e := godotenv.Load()
-	handle(e)
+	c.Handle(e)
 
 	port = os.Getenv("PORT")
 	gob.Register(&c.SessionData{})

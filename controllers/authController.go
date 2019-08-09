@@ -10,7 +10,7 @@ import (
 // SignupHandler handles the "/signup" route.
 func SignupHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := store.Get(r, sessionCookie)
-	handle(err)
+	Handle(err)
 	isAuth := checkAuth(session)
 	data := info{Title: "Sign Up"}
 	meta := filepath.Join("templates", "meta", "auth.html.tmpl")
@@ -42,7 +42,7 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tmpl, err := template.ParseFiles(base, menu, meta, body)
-	handle(err)
+	Handle(err)
 	tmpl.ExecuteTemplate(w, "layout", data)
 	return
 }
@@ -50,7 +50,7 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 // LoginHandler handles the "/login" route.
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := store.Get(r, sessionCookie)
-	handle(err)
+	Handle(err)
 	isAuth := checkAuth(session)
 	data := info{Title: "Log In"}
 	meta := filepath.Join("templates", "meta", "auth.html.tmpl")
@@ -81,7 +81,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tmpl, err := template.ParseFiles(base, menu, meta, body)
-	handle(err)
+	Handle(err)
 	tmpl.ExecuteTemplate(w, "layout", data)
 	return
 }
@@ -89,7 +89,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 // LogoutHandler handles the "/logout" route.
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := store.Get(r, sessionCookie)
-	handle(err)
+	Handle(err)
 	session.Values["isAuth"] = false
 	delete(session.Values, "data")
 	log.Println(session.Save(r, w))
@@ -100,7 +100,7 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 // ResetHandler handles the "/reset" route.
 func ResetHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := store.Get(r, sessionCookie)
-	handle(err)
+	Handle(err)
 	isAuth := checkAuth(session)
 	data := info{Title: "Reset Password"}
 	meta := filepath.Join("templates", "meta", "auth.html.tmpl")
@@ -118,7 +118,7 @@ func ResetHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tmpl, err := template.ParseFiles(base, menu, meta, body)
-	handle(err)
+	Handle(err)
 	tmpl.ExecuteTemplate(w, "layout", data)
 	return
 }
