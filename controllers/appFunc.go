@@ -3,6 +3,7 @@ package controllers
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -31,6 +32,9 @@ func (n *noteDrop) getNote(voucher string) error {
 	defer resp.Body.Close()
 	result := make(map[string]interface{})
 	json.NewDecoder(resp.Body).Decode(&result)
+	if result["data"] == nil {
+		return errors.New("that note does not exist")
+	}
 	resultData := result["data"].(map[string]interface{})
 	n.Subject = resultData["subject"].(string)
 	n.Content = resultData["content"].(string)
