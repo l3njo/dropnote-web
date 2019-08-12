@@ -35,13 +35,6 @@ func checkAuth(session *sessions.Session) bool {
 	return true
 }
 
-func getMenu(isAuth bool) string {
-	if isAuth {
-		return filepath.Join("templates", "menu", "private_nav.html.tmpl")
-	}
-	return filepath.Join("templates", "menu", "public_nav.html.tmpl")
-}
-
 func getNext(r *http.Request) string {
 	nextList, ok := r.URL.Query()["next"]
 	if !ok || len(nextList[0]) < 1 {

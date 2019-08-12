@@ -11,10 +11,8 @@ import (
 func SignupHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := store.Get(r, sessionCookie)
 	Handle(err)
-	isAuth := checkAuth(session)
 	data := info{Title: "Sign Up"}
 	meta := filepath.Join("templates", "meta", "auth.html.tmpl")
-	menu := getMenu(isAuth)
 	body := filepath.Join("templates", "signup.html.tmpl")
 	if r.Method == "POST" {
 		r.ParseForm()
@@ -31,7 +29,7 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 			data.Message = msg
 		}
 
-		if sData, ok := payload.tryAuth(); ok {
+		if sData, err := payload.tryAuth(); err == nil {
 			session.Values["isAuth"] = true
 			session.Values["data"] = sData
 			log.Println(session.Save(r, w))
@@ -41,7 +39,7 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 		data.Message = "Your signup credentials are invalid."
 	}
 
-	tmpl, err := template.ParseFiles(base, menu, meta, body)
+	tmpl, err := template.ParseFiles(base, meta, body)
 	Handle(err)
 	tmpl.ExecuteTemplate(w, "layout", data)
 	return
@@ -51,10 +49,8 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := store.Get(r, sessionCookie)
 	Handle(err)
-	isAuth := checkAuth(session)
 	data := info{Title: "Log In"}
 	meta := filepath.Join("templates", "meta", "auth.html.tmpl")
-	menu := getMenu(isAuth)
 	body := filepath.Join("templates", "login.html.tmpl")
 	if r.Method == "POST" {
 		r.ParseForm()
@@ -66,7 +62,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			Pass: r.Form["pass"][0],
 		}
 
-		if sData, ok := payload.tryAuth(); ok {
+		if sData, err := payload.tryAuth(); err == nil {
 			session.Values["isAuth"] = true
 			session.Values["data"] = sData
 			log.Println(session.Save(r, w))
@@ -76,7 +72,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		data.Message = "Your login credentials are invalid."
 	}
 
-	tmpl, err := template.ParseFiles(base, menu, meta, body)
+	tmpl, err := template.ParseFiles(base, meta, body)
 	Handle(err)
 	tmpl.ExecuteTemplate(w, "layout", data)
 	return
@@ -95,12 +91,8 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 
 // ResetHandler handles the "/reset" route.
 func ResetHandler(w http.ResponseWriter, r *http.Request) {
-	session, err := store.Get(r, sessionCookie)
-	Handle(err)
-	isAuth := checkAuth(session)
 	data := info{Title: "Reset Password"}
 	meta := filepath.Join("templates", "meta", "auth.html.tmpl")
-	menu := getMenu(isAuth)
 	body := filepath.Join("templates", "reset.html.tmpl")
 	if r.Method == "POST" {
 		r.ParseForm()
@@ -114,7 +106,7 @@ func ResetHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	tmpl, err := template.ParseFiles(base, menu, meta, body)
+	tmpl, err := template.ParseFiles(base, meta, body)
 	Handle(err)
 	tmpl.ExecuteTemplate(w, "layout", data)
 	return

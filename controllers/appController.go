@@ -25,11 +25,10 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 
 	data := info{Title: "Home"}
 	meta := filepath.Join("templates", "meta", "home.html.tmpl")
-	menu := getMenu(isAuth)
 	body := filepath.Join("templates", "home.html.tmpl")
 	if isAuth {
 		sData := session.Values["data"].(*SessionData)
-		data.Name, data.Mail = sData.Name, sData.Mail 
+		data.Name, data.Mail = sData.Name, sData.Mail
 	}
 
 	if r.URL.Path != "/" && r.URL.Path != "/home" {
@@ -39,7 +38,7 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 		body = filepath.Join("templates", "error.html.tmpl")
 	}
 
-	tmpl, err := template.ParseFiles(base, menu, meta, body)
+	tmpl, err := template.ParseFiles(base, meta, body)
 	Handle(err)
 	tmpl.ExecuteTemplate(w, "layout", data)
 	return
@@ -52,11 +51,10 @@ func DropNoteHandler(w http.ResponseWriter, r *http.Request) {
 	isAuth := checkAuth(session)
 	data := info{Title: "Drop Note"}
 	meta := filepath.Join("templates", "meta", "drop.html.tmpl")
-	menu := getMenu(isAuth)
 	body := filepath.Join("templates", "dropnote.html.tmpl")
 	if isAuth {
 		sData := session.Values["data"].(*SessionData)
-		data.Name, data.Mail = sData.Name, sData.Mail 
+		data.Name, data.Mail = sData.Name, sData.Mail
 	}
 
 	if r.Method == "POST" {
@@ -83,7 +81,7 @@ func DropNoteHandler(w http.ResponseWriter, r *http.Request) {
 		body = filepath.Join("templates", "info.html.tmpl")
 	}
 
-	tmpl, err := template.ParseFiles(base, menu, meta, body)
+	tmpl, err := template.ParseFiles(base, meta, body)
 	Handle(err)
 	tmpl.ExecuteTemplate(w, "layout", data)
 	return
@@ -97,11 +95,10 @@ func DropCodeHandler(w http.ResponseWriter, r *http.Request) {
 	var voucher string
 	data := info{Title: "Drop Code"}
 	meta := filepath.Join("templates", "meta", "drop.html.tmpl")
-	menu := getMenu(isAuth)
 	body := filepath.Join("templates", "dropcode.html.tmpl")
 	if isAuth {
 		sData := session.Values["data"].(*SessionData)
-		data.Name, data.Mail = sData.Name, sData.Mail 
+		data.Name, data.Mail = sData.Name, sData.Mail
 	}
 
 	if keys, ok := r.URL.Query()["voucher"]; ok && len(keys) > 0 {
@@ -118,7 +115,7 @@ func DropCodeHandler(w http.ResponseWriter, r *http.Request) {
 		body = filepath.Join("templates", "info.html.tmpl")
 	}
 
-	tmpl, err := template.ParseFiles(base, menu, meta, body)
+	tmpl, err := template.ParseFiles(base, meta, body)
 	Handle(err)
 	tmpl.ExecuteTemplate(w, "layout", data)
 	return

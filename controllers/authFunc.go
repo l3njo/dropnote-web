@@ -3,8 +3,8 @@ package controllers
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
-	"log"
 	"net/http"
 )
 
@@ -27,53 +27,52 @@ func (s *signupData) validate() (bool, string) {
 	return true, ""
 }
 
-func (s *signupData) tryAuth() (*SessionData, bool) {
+func (s *signupData) tryAuth() (*SessionData, error) {
 	session := &SessionData{}
 	url := fmt.Sprintf("%susers/new", api)
 	requestBody, err := json.Marshal(s)
 	if err != nil {
-		return session, false
+		return session, err
 	}
 
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(requestBody))
 	if err != nil {
-		return session, false
+		return session, err
 	}
 	defer resp.Body.Close()
 
 	result := make(map[string]interface{})
 	json.NewDecoder(resp.Body).Decode(&result)
 	if status := result["status"].(bool); !status {
-		return session, false
+		return session, errors.New(result["message"].(string))
 	}
-	log.Println(result) // DEBUG
 
 	session.buildSession(result)
-	return session, true
+	return session, nil
 }
 
-func (l *loginData) tryAuth() (*SessionData, bool) {
+func (l *loginData) tryAuth() (*SessionData, error) {
 	session := &SessionData{}
 	url := fmt.Sprintf("%susers/login", api)
 	requestBody, err := json.Marshal(l)
 	if err != nil {
-		return session, false
+		return session, err
 	}
 
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(requestBody))
 	if err != nil {
-		return session, false
+		return session, err
 	}
 	defer resp.Body.Close()
 
 	result := make(map[string]interface{})
 	json.NewDecoder(resp.Body).Decode(&result)
 	if status := result["status"].(bool); !status {
-		return session, false
+		return session, errors.New(result["message"].(string))
 	}
 
 	session.buildSession(result)
-	return session, true
+	return session, nil
 }
 
 func tryReset(mail string) error {
@@ -92,7 +91,7 @@ func tryReset(mail string) error {
 	result := make(map[string]interface{})
 	json.NewDecoder(resp.Body).Decode(&result)
 	if status := result["status"].(bool); !status {
-		return errors.New(result["message"])
+		return errors.New(result["message"].(string))
 	}
 
 	return nil

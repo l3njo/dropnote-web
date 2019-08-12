@@ -13,7 +13,6 @@ func MeHandler(w http.ResponseWriter, r *http.Request) {
 	isAuth := checkAuth(session)
 	data := info{Title: "Profile"}
 	meta := filepath.Join("templates", "meta", "me.html.tmpl")
-	menu := getMenu(isAuth)
 	body := filepath.Join("templates", "me.html.tmpl")
 	if !isAuth {
 		data.Title, data.Heading = "401", "You can't access this!"
@@ -27,7 +26,7 @@ func MeHandler(w http.ResponseWriter, r *http.Request) {
 		Handle(err)
 	}
 
-	tmpl, err := template.New("me.html").Funcs(funcMap).ParseFiles(base, menu, meta, body)
+	tmpl, err := template.New("me.html").Funcs(funcMap).ParseFiles(base, meta, body)
 	Handle(err)
 	err = tmpl.ExecuteTemplate(w, "layout", data)
 	Handle(err)
