@@ -7,6 +7,12 @@ import (
 	"path/filepath"
 )
 
+var funcMap = template.FuncMap{
+	"inc": func(i int) int {
+		return i + 1
+	},
+}
+
 // IndexHandler handles the "/", "/home", "/favicon.ico" and all undefined routes.
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := store.Get(r, sessionCookie)
@@ -23,13 +29,14 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	body := filepath.Join("templates", "home.html.tmpl")
 	if isAuth {
 		sData := session.Values["data"].(*SessionData)
-		data.User = sData.Name
+		data.Name, data.Mail = sData.Name, sData.Mail 
 	}
 
 	if r.URL.Path != "/" && r.URL.Path != "/home" {
-		data.Title = "404"
-		meta = filepath.Join("templates", "meta", "404.html.tmpl")
-		body = filepath.Join("templates", "404.html.tmpl")
+		data.Title, data.Heading = "404", "We are sorry, Page not found!"
+		data.Message = "The page you are looking for might have been removed had its name changed or is temporarily unavailable."
+		meta = filepath.Join("templates", "meta", "error.html.tmpl")
+		body = filepath.Join("templates", "error.html.tmpl")
 	}
 
 	tmpl, err := template.ParseFiles(base, menu, meta, body)
@@ -49,13 +56,13 @@ func DropNoteHandler(w http.ResponseWriter, r *http.Request) {
 	body := filepath.Join("templates", "dropnote.html.tmpl")
 	if isAuth {
 		sData := session.Values["data"].(*SessionData)
-		data.User = sData.Name
+		data.Name, data.Mail = sData.Name, sData.Mail 
 	}
 
 	if r.Method == "POST" {
 		r.ParseForm()
 		subject := r.Form["subject"][0]
-		noteData := &note{
+		noteData := &noteDrop{
 			Subject: subject,
 			Content: r.Form["content"][0],
 		}
@@ -94,14 +101,14 @@ func DropCodeHandler(w http.ResponseWriter, r *http.Request) {
 	body := filepath.Join("templates", "dropcode.html.tmpl")
 	if isAuth {
 		sData := session.Values["data"].(*SessionData)
-		data.User = sData.Name
+		data.Name, data.Mail = sData.Name, sData.Mail 
 	}
 
 	if keys, ok := r.URL.Query()["voucher"]; ok && len(keys) > 0 {
 		voucher = keys[0]
 		data.Heading, data.Message = "Error!", "Your voucher is invalid."
 		if validateCode(voucher) {
-			noteData := &note{}
+			noteData := &noteDrop{}
 			data.Message = "Something has gone horribly wrong."
 			if err := noteData.getNote(voucher); err == nil {
 				data.Heading, data.Message = noteData.Subject, noteData.Content

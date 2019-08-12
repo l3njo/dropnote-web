@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -27,8 +28,8 @@ func (s *signupData) validate() (bool, string) {
 }
 
 func (s *signupData) tryAuth() (*SessionData, bool) {
-	var session *SessionData
-	url := fmt.Sprintf("%suser/new", api)
+	session := &SessionData{}
+	url := fmt.Sprintf("%susers/new", api)
 	requestBody, err := json.Marshal(s)
 	if err != nil {
 		return session, false
@@ -40,19 +41,20 @@ func (s *signupData) tryAuth() (*SessionData, bool) {
 	}
 	defer resp.Body.Close()
 
-	var result map[string]interface{}
+	result := make(map[string]interface{})
 	json.NewDecoder(resp.Body).Decode(&result)
 	if status := result["status"].(bool); !status {
 		return session, false
 	}
+	log.Println(result) // DEBUG
 
 	session.buildSession(result)
 	return session, true
 }
 
 func (l *loginData) tryAuth() (*SessionData, bool) {
-	var session *SessionData
-	url := fmt.Sprintf("%suser/login", api)
+	session := &SessionData{}
+	url := fmt.Sprintf("%susers/login", api)
 	requestBody, err := json.Marshal(l)
 	if err != nil {
 		return session, false
@@ -64,7 +66,7 @@ func (l *loginData) tryAuth() (*SessionData, bool) {
 	}
 	defer resp.Body.Close()
 
-	var result map[string]interface{}
+	result := make(map[string]interface{})
 	json.NewDecoder(resp.Body).Decode(&result)
 	if status := result["status"].(bool); !status {
 		return session, false
@@ -74,24 +76,24 @@ func (l *loginData) tryAuth() (*SessionData, bool) {
 	return session, true
 }
 
-func tryReset(mail string) bool {
-	url := fmt.Sprintf("%suser/action/reset", api)
+func tryReset(mail string) error {
+	url := fmt.Sprintf("%susers/actions/reset", api)
 	requestBody, err := json.Marshal(map[string]string{"mail": mail})
 	if err != nil {
-		return false
+		return err
 	}
 
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(requestBody))
 	if err != nil {
-		return false
+		return err
 	}
 	defer resp.Body.Close()
 
-	var result map[string]interface{}
+	result := make(map[string]interface{})
 	json.NewDecoder(resp.Body).Decode(&result)
 	if status := result["status"].(bool); !status {
-		return false
+		return errors.New(result["message"])
 	}
 
-	return true
+	return nil
 }

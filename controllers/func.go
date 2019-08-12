@@ -17,8 +17,15 @@ var (
 	base = filepath.Join("templates", "base.html.tmpl")
 )
 
+// User represents a user
+type User struct {
+	Name, Mail string
+}
+
 type info struct {
-	Title, Heading, Message, User string
+	Title, Heading, Message string
+	User
+	Notes []Note
 }
 
 func checkAuth(session *sessions.Session) bool {

@@ -108,7 +108,8 @@ func ResetHandler(w http.ResponseWriter, r *http.Request) {
 		meta = filepath.Join("templates", "meta", "info.html.tmpl")
 		body = filepath.Join("templates", "info.html.tmpl")
 
-		if ok := tryReset(r.Form["mail"][0]); !ok {
+		if err := tryReset(r.Form["mail"][0]); err != nil {
+			Handle(err)
 			data.Heading, data.Message = "Error!", "Something has gone horribly wrong."
 		}
 	}

@@ -1,0 +1,61 @@
+{{define "content"}}
+{{$u := .User}}
+<div class="container py-3">
+    <div class="card my-3">
+        <div class="card-header">User Profile</div>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">Username: {{$u.Name}}</li>
+            <li class="list-group-item">Email: {{$u.Mail}}</li>
+        </ul>
+        <div class="card-body row">
+            <div class="col-md-4 col-sm-12 col-xs-12 text-center">
+                <a href="#" class="btn btn-link card-link">Edit Profile</a>
+            </div>
+            <div class="col-md-4 col-sm-12 col-xs-12 text-center">
+                <a href="#" class="btn btn-link card-link">Change Password</a>
+            </div>
+            <div class="col-md-4 col-sm-12 col-xs-12 text-center">
+                <a href="#" class="btn btn-link card-link text-danger">Delete Account</a>
+            </div>   
+        </div>
+    </div>
+    <table class="table table-borderless table-hover datatable my-3">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Subject</th>
+                <th scope="col">Content</th>
+                <th scope="col">Date</th>
+                <th scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{range $i, $v := .Notes}}
+            <tr {{if not .Visible -}} class="table-dark" {{- end}}>
+                <th scope="row" {{if not .Visible -}} class="table-dark" {{- end}}>{{inc $i}}</th>
+                <td {{if not .Visible -}} class="table-dark" {{- end}}>{{$v.Subject}}</td>
+                <td {{if not .Visible -}} class="table-dark" {{- end}}>{{$v.Content}}</td>
+                <td {{if not .Visible -}} class="table-dark" {{- end}}>{{$v.Dropped}}</td>
+                <td {{if not .Visible -}} class="table-dark" {{- end}}>
+                    <a href="/me/notes/edit?note= {{- $v.Voucher}}" title="Edit" class="btn btn-link">
+                        <i class="far fa-edit"></i>
+                    </a>
+                    {{if $v.Visible}}
+                    <a href="/me/notes/action?a=hide&note= {{- $v.Voucher}}" title="Hide" class="btn btn-link">
+                        <i class="far fa-eye-slash"></i>
+                    </a>
+                    {{else}}
+                    <a href="/me/notes/action?a=show&note= {{- $v.Voucher}}" title="Show" class="btn btn-link">
+                        <i class="far fa-eye"></i>
+                    </a>
+                    {{end}}
+                    <a href="/me/notes/action?a=delete&note= {{- $v.Voucher}}" title="Delete" class="btn btn-link">
+                        <i class="far fa-trash-alt"></i>
+                    </a>
+                </td>
+            </tr>
+            {{end}}
+        </tbody>
+    </table>
+</div>
+{{end}}

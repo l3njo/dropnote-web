@@ -6,10 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>{{.Title}} | DropNote</title>
-    <link rel="stylesheet" href="/static/vendor/bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/static/vendor/fontawesome/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/vendor/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/vendor/datatables/datatables.min.css"/>
+    <link rel="stylesheet" type="text/css" href="/static/vendor/fontawesome/css/all.min.css">
     <link rel="stylesheet" href="/static/css/main.css">
-    {{ template "stylesheet" }}
+    {{ template "meta" }}
 </head>
 <body class="d-flex flex-column h-100">
     <header>
@@ -47,8 +48,9 @@
             <p class="m-0 text-muted">Powered by !boop</p>
         </div>
     </footer>
-    <script src="/static/vendor/jquery/jquery.min.js"></script>
-    <script src="/static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script type="text/javascript" src="/static/vendor/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="/static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script type="text/javascript" src="/static/vendor/datatables/datatables.min.js"></script>
     <script src="/static/js/main.js"></script>
 </body>
 </html>
