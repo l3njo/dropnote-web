@@ -2,9 +2,10 @@ package controllers
 
 import (
 	"html/template"
-	"log"
 	"net/http"
 	"path/filepath"
+
+	"github.com/l3njo/dropnote-web/models"
 )
 
 // SignupHandler handles the "/signup" route.
@@ -19,24 +20,24 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 		data.Heading = "Error!"
 		meta = filepath.Join("templates", "meta", "info.html.tmpl")
 		body = filepath.Join("templates", "info.html.tmpl")
-		payload := signupData{
+		user := &models.User{
 			Name:    r.Form["name"][0],
 			Mail:    r.Form["mail"][0],
 			Pass:    r.Form["pass"][0],
-			confirm: r.Form["confirm"][0],
-		}
-		if ok, msg := payload.validate(); !ok {
-			data.Message = msg
+			Confirm: r.Form["confirm"][0],
 		}
 
-		if sData, err := payload.tryAuth(); err == nil {
+		if err := user.ValidateSignup(); err != nil {
+			data.Message = err.Error()
+		} else if err := user.TrySignup(); err != nil {
+			data.Message = err.Error()
+		} else {
 			session.Values["isAuth"] = true
-			session.Values["data"] = sData
-			log.Println(session.Save(r, w))
+			session.Values["data"] = user
+			Handle(session.Save(r, w))
 			http.Redirect(w, r, getNext(r), http.StatusFound)
 			return
 		}
-		data.Message = "Your signup credentials are invalid."
 	}
 
 	tmpl, err := template.ParseFiles(base, meta, body)
@@ -57,19 +58,20 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		data.Heading = "Error!"
 		meta = filepath.Join("templates", "meta", "info.html.tmpl")
 		body = filepath.Join("templates", "info.html.tmpl")
-		payload := loginData{
+		user := &models.User{
 			Mail: r.Form["mail"][0],
 			Pass: r.Form["pass"][0],
 		}
 
-		if sData, err := payload.tryAuth(); err == nil {
+		if err := user.TryLogin(); err != nil {
+			data.Message = err.Error()
+		} else {
 			session.Values["isAuth"] = true
-			session.Values["data"] = sData
-			log.Println(session.Save(r, w))
+			session.Values["data"] = user
+			Handle(session.Save(r, w))
 			http.Redirect(w, r, getNext(r), http.StatusFound)
 			return
 		}
-		data.Message = "Your login credentials are invalid."
 	}
 
 	tmpl, err := template.ParseFiles(base, meta, body)
@@ -84,7 +86,7 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	Handle(err)
 	session.Values["isAuth"] = false
 	delete(session.Values, "data")
-	log.Println(session.Save(r, w))
+	Handle(session.Save(r, w))
 	http.Redirect(w, r, getNext(r), http.StatusFound)
 	return
 }
@@ -100,7 +102,7 @@ func ResetHandler(w http.ResponseWriter, r *http.Request) {
 		meta = filepath.Join("templates", "meta", "info.html.tmpl")
 		body = filepath.Join("templates", "info.html.tmpl")
 
-		if err := tryReset(r.Form["mail"][0]); err != nil {
+		if err := models.TryReset(r.Form["mail"][0]); err != nil {
 			Handle(err)
 			data.Heading, data.Message = "Error!", "Something has gone horribly wrong."
 		}

@@ -4,6 +4,8 @@ import (
 	"html/template"
 	"net/http"
 	"path/filepath"
+
+	"github.com/l3njo/dropnote-web/models"
 )
 
 // MeHandler handles the "/me" route.
@@ -20,9 +22,9 @@ func MeHandler(w http.ResponseWriter, r *http.Request) {
 		meta = filepath.Join("templates", "meta", "error.html.tmpl")
 		body = filepath.Join("templates", "error.html.tmpl")
 	} else {
-		sData := session.Values["data"].(*SessionData)
-		data.Name, data.Mail = sData.Name, sData.Mail
-		data.Notes, err = getNotes(sData.Auth)
+		user := session.Values["data"].(*models.User)
+		data.Name, data.Mail = user.Name, user.Mail
+		data.Notes, err = user.GetNotes()
 		Handle(err)
 	}
 

@@ -9,6 +9,7 @@ import (
 
 	"github.com/joho/godotenv"
 	a "github.com/l3njo/dropnote-web/app"
+	m "github.com/l3njo/dropnote-web/models"
 	c "github.com/l3njo/dropnote-web/controllers"
 )
 
@@ -33,9 +34,8 @@ func init() {
 
 	e := godotenv.Load()
 	c.Handle(e)
-
 	port = os.Getenv("PORT")
-	gob.Register(&c.SessionData{})
+	gob.Register(&m.User{})
 }
 
 func main() {

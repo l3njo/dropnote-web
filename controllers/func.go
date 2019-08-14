@@ -3,33 +3,34 @@ package controllers
 import (
 	"log"
 	"net/http"
+	"os"
 	"path/filepath"
+
+	"github.com/l3njo/dropnote-web/models"
 
 	"github.com/gorilla/sessions"
 )
 
 const (
-	site = "https://drop-note.herokuapp.com/"
-	api  = "https://dropnote-api.herokuapp.com/api/"
+	sessionCookie = "session-cookie"
+	site          = "https://drop-note.herokuapp.com/"
+	api           = "https://dropnote-api.herokuapp.com/api/"
 )
 
 var (
-	base = filepath.Join("templates", "base.html.tmpl")
+	base  = filepath.Join("templates", "base.html.tmpl")
+	key   = []byte(os.Getenv("AES_KEY"))
+	store = sessions.NewCookieStore(key)
 )
-
-// User represents a user
-type User struct {
-	Name, Mail string
-}
 
 type info struct {
 	Title, Heading, Message string
-	User
-	Notes []Note
+	models.User
+	Notes []models.Note
 }
 
-func checkAuth(session *sessions.Session) bool {
-	if auth, ok := session.Values["isAuth"].(bool); !ok || !auth {
+func checkAuth(s *sessions.Session) bool {
+	if auth, ok := s.Values["isAuth"].(bool); !ok || !auth {
 		return false
 	}
 	return true
