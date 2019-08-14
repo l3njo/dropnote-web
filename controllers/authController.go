@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"html/template"
 	"net/http"
 	"path/filepath"
@@ -15,11 +16,14 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 	data := info{Title: "Sign Up"}
 	meta := filepath.Join("templates", "meta", "auth.html.tmpl")
 	body := filepath.Join("templates", "signup.html.tmpl")
+	if flashes := session.Flashes(); len(flashes) > 0 {
+		for _, v := range flashes {
+			data.Flash = append(data.Flash, fmt.Sprint(v))
+		}
+	}
+
 	if r.Method == "POST" {
 		r.ParseForm()
-		data.Heading = "Error!"
-		meta = filepath.Join("templates", "meta", "info.html.tmpl")
-		body = filepath.Join("templates", "info.html.tmpl")
 		user := &models.User{
 			Name:    r.Form["name"][0],
 			Mail:    r.Form["mail"][0],
@@ -27,17 +31,19 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 			Confirm: r.Form["confirm"][0],
 		}
 
+		next := "/signup"
 		if err := user.ValidateSignup(); err != nil {
-			data.Message = err.Error()
+			session.AddFlash(err.Error())
 		} else if err := user.TrySignup(); err != nil {
-			data.Message = err.Error()
+			session.AddFlash(err.Error())
 		} else {
 			session.Values["isAuth"] = true
 			session.Values["data"] = user
-			Handle(session.Save(r, w))
-			http.Redirect(w, r, getNext(r), http.StatusFound)
-			return
+			next = getNext(r)
 		}
+		Handle(session.Save(r, w))
+		http.Redirect(w, r, next, http.StatusFound)
+		return
 	}
 
 	tmpl, err := template.ParseFiles(base, meta, body)
@@ -53,25 +59,30 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	data := info{Title: "Log In"}
 	meta := filepath.Join("templates", "meta", "auth.html.tmpl")
 	body := filepath.Join("templates", "login.html.tmpl")
+	if flashes := session.Flashes(); len(flashes) > 0 {
+		for _, v := range flashes {
+			data.Flash = append(data.Flash, fmt.Sprint(v))
+		}
+	}
+
 	if r.Method == "POST" {
 		r.ParseForm()
-		data.Heading = "Error!"
-		meta = filepath.Join("templates", "meta", "info.html.tmpl")
-		body = filepath.Join("templates", "info.html.tmpl")
 		user := &models.User{
 			Mail: r.Form["mail"][0],
 			Pass: r.Form["pass"][0],
 		}
 
+		next := "/login"
 		if err := user.TryLogin(); err != nil {
-			data.Message = err.Error()
+			session.AddFlash(err.Error())
 		} else {
 			session.Values["isAuth"] = true
 			session.Values["data"] = user
-			Handle(session.Save(r, w))
-			http.Redirect(w, r, getNext(r), http.StatusFound)
-			return
+			next = getNext(r)
 		}
+		Handle(session.Save(r, w))
+		http.Redirect(w, r, next, http.StatusFound)
+		return
 	}
 
 	tmpl, err := template.ParseFiles(base, meta, body)

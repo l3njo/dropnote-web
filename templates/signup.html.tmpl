@@ -2,6 +2,15 @@
 <div class="limiter">
     <div class="container-auth">
         <div class="wrap-auth">
+            {{range .Flash}}
+            <div class="alert alert-danger alert-dismissible fade show text-capitalize" role="alert">
+                <strong>Failed!</strong> {{.}}.
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            {{end}}
+
             <form class="auth-form" method="POST">
                 <span class="auth-form-title mb-3">Sign Up</span>
 
@@ -9,7 +18,7 @@
                     <input class="auth-input" type="text" name="name" placeholder="Username" required>
                     <span class="focus-auth-input"></span>
                 </div>
-                
+
                 <div class="wrap-auth-input  mb-3">
                     <input class="auth-input" type="email" name="mail" placeholder="Email Address" required>
                     <span class="focus-auth-input"></span>
@@ -19,7 +28,7 @@
                     <input class="auth-input" type="password" name="pass" placeholder="Password" minlength="8" required>
                     <span class="focus-auth-input"></span>
                 </div>
-                
+
                 <div class="wrap-auth-input  mb-3">
                     <input class="auth-input" type="password" name="confirm" placeholder="Confirm Password" required>
                     <span class="focus-auth-input"></span>

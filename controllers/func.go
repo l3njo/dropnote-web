@@ -25,6 +25,7 @@ var (
 
 type info struct {
 	Title, Heading, Message string
+	Flash                   []string
 	models.User
 	Notes []models.Note
 }
