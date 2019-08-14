@@ -20,6 +20,7 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 		for _, v := range flashes {
 			data.Flash = append(data.Flash, fmt.Sprint(v))
 		}
+		Handle(session.Save(r, w))
 	}
 
 	if r.Method == "POST" {
@@ -63,6 +64,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		for _, v := range flashes {
 			data.Flash = append(data.Flash, fmt.Sprint(v))
 		}
+		Handle(session.Save(r, w))
 	}
 
 	if r.Method == "POST" {

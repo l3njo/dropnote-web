@@ -11,8 +11,7 @@ import (
 
 // Application represents the application
 type Application struct {
-	mux     *http.ServeMux
-	session string
+	mux *http.ServeMux
 }
 
 // Init sets up the router
@@ -27,6 +26,7 @@ func (a *Application) Init() {
 	a.mux.HandleFunc("/logout", c.LogoutHandler)
 	a.mux.HandleFunc("/reset", c.ResetHandler)
 
+	a.mux.HandleFunc("/me/notes/action", c.NoteActionsHandler)
 	a.mux.HandleFunc("/me", c.MeHandler)
 
 	a.mux.HandleFunc("/", c.IndexHandler)

@@ -34,9 +34,19 @@ func (n *Note) ValidateGet() error {
 }
 
 // Get returns populates the provided note with data
-func (n *Note) Get() error {
+func (n *Note) Get(auth string) error {
 	url := fmt.Sprintf("%snotes/%s", api, n.Voucher)
-	resp, err := http.Get(url)
+	request, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return err
+	}
+
+	if auth != "" {
+		auth := fmt.Sprintf("Bearer %s", auth)
+		request.Header.Add("Authorization", auth)
+	}
+
+	resp, err := http.DefaultClient.Do(request)
 	if err != nil {
 		return err
 	}
@@ -95,5 +105,55 @@ func (n *Note) Post(auth string) error {
 	}
 
 	*n = result.Note
+	return nil
+}
+
+// Toggle changes the provided note's visibility
+func (n *Note) Toggle(auth string) error {
+	url := fmt.Sprintf("%sme/notes/toggle/%s", api, n.Voucher)
+	request, err := http.NewRequest("PUT", url, nil)
+	if err != nil {
+		return err
+	}
+
+	request.Header.Add("Authorization", fmt.Sprintf("Bearer %s", auth))
+	resp, err := http.DefaultClient.Do(request)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	result := &noteResult{}
+	json.NewDecoder(resp.Body).Decode(&result)
+	if !result.Status {
+		return errors.New(result.Message)
+	}
+
+	*n = result.Note
+	return nil
+}
+
+// Delete deletes the provided note
+func (n *Note) Delete(auth string) error {
+	url := fmt.Sprintf("%sme/notes/delete/%s", api, n.Voucher)
+	request, err := http.NewRequest("DELETE", url, nil)
+	if err != nil {
+		return err
+	}
+
+	request.Header.Add("Authorization", fmt.Sprintf("Bearer %s", auth))
+	resp, err := http.DefaultClient.Do(request)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	result := make(map[string]interface{})
+	json.NewDecoder(resp.Body).Decode(&result)
+	if status := result["status"].(bool); !status {
+		return errors.New(result["message"].(string))
+	}
+
+	*n = Note{}
 	return nil
 }

@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/l3njo/dropnote-web/models"
+	uuid "github.com/satori/go.uuid"
 )
 
 var funcMap = template.FuncMap{
@@ -96,11 +97,12 @@ func DropCodeHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := store.Get(r, sessionCookie)
 	Handle(err)
 	isAuth := checkAuth(session)
+	uData := &models.User{}
 	data := info{Title: "Drop Code"}
 	meta := filepath.Join("templates", "meta", "drop.html.tmpl")
 	body := filepath.Join("templates", "dropcode.html.tmpl")
 	if isAuth {
-		uData := session.Values["data"].(*models.User)
+		uData = session.Values["data"].(*models.User)
 		data.Name, data.Mail = uData.Name, uData.Mail
 	}
 
@@ -109,8 +111,12 @@ func DropCodeHandler(w http.ResponseWriter, r *http.Request) {
 		if err := note.ValidateGet(); err != nil {
 			data.Heading, data.Message = "Error!", err.Error()
 		} else {
-			if err := note.Get(); err != nil {
+			if err := note.Get(uData.Auth); err != nil {
 				data.Message = err.Error()
+			} else if *note == (models.Note{}) {
+				data.Message = "That note does not exist"
+			} else if uuid.Equal(uuid.FromStringOrNil(note.Voucher), uuid.Nil) {
+				data.Message = "That note does not exist"
 			} else {
 				data.Heading, data.Message = note.Subject, note.Content
 			}
