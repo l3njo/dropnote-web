@@ -36,6 +36,7 @@ func init() {
 	c.Handle(e)
 	port = os.Getenv("PORT")
 	gob.Register(&m.User{})
+	gob.Register(&c.Flash{})
 }
 
 func main() {

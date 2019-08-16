@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/l3njo/dropnote-web/models"
+	uuid "github.com/satori/go.uuid"
 
 	"github.com/gorilla/sessions"
 )
@@ -23,10 +24,24 @@ var (
 	store = sessions.NewCookieStore(key)
 )
 
-type info struct {
-	Title, Heading, Message string
-	Flash                   []string
+// Flash stores flash messages
+type Flash struct {
+	Message string
+	Status  bool
+}
+
+// Info holds data for informational pages
+type Info struct {
+	Heading, Message string
+}
+
+// Page holds page data
+type Page struct {
+	Title string
+	Info
+	Flashes []Flash
 	models.User
+	models.Note
 	Notes []models.Note
 }
 
@@ -44,6 +59,13 @@ func getNext(r *http.Request) string {
 	}
 	next := nextList[0]
 	return next
+}
+
+func isUUID(s string) bool {
+	if _, e := uuid.FromString(s); e != nil {
+		return false
+	}
+	return true
 }
 
 // Handle deals with top-level errors

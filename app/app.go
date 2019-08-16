@@ -26,9 +26,12 @@ func (a *Application) Init() {
 	a.mux.HandleFunc("/logout", c.LogoutHandler)
 	a.mux.HandleFunc("/reset", c.ResetHandler)
 
+	a.mux.HandleFunc("/me/notes/update/", c.NoteUpdateHandler)
 	a.mux.HandleFunc("/me/notes/action", c.NoteActionsHandler)
+	a.mux.HandleFunc("/me/notes/", c.MyNotesHandler)
 	a.mux.HandleFunc("/me", c.MeHandler)
 
+	a.mux.HandleFunc("/temp/qr/notes/", c.QRHandler)
 	a.mux.HandleFunc("/", c.IndexHandler)
 
 	fs := http.FileServer(http.Dir("static"))

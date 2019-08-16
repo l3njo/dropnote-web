@@ -2,21 +2,33 @@
 <div class="container-drop">
     <div class="wrap-drop">
         <form class="drop-form" method="POST">
-            <span class="drop-form-title">Drop A Note</span>
+            <span class="drop-form-title">
+                {{if .Note.Voucher -}} Edit {{- else -}} Drop {{- end}} A Note
+            </span>
+            
+            {{$subject := "Note Subject"}}
+            {{$content := "Note Content"}}
+            {{$checked := ""}}
+            {{if .Note.Voucher}}
+            {{$n := .Note}}
+            {{$subject = $n.Subject}}
+            {{$content = $n.Content}}
+            {{$checked = "checked"}}
+            {{end}}
 
             <div class="wrap-drop-input">
-                <input class="drop-input" type="text" name="subject" placeholder="Note Subject">
+                <input class="drop-input" type="text" name="subject" placeholder="{{$subject}}">
                 <span class="focus-drop-input"></span>
             </div>
 
             <div class="wrap-drop-input">
-                <textarea class="drop-input" name="content" placeholder="Note Content"></textarea>
+                <textarea class="drop-input" name="content" placeholder="{{$content}}"></textarea>
                 <span class="focus-drop-input"></span>
             </div>
 
             {{if .User.Name}}
             <div class="custom-control custom-switch">
-                <input type="checkbox" class="custom-control-input" id="shouldLink" name="shouldLink">
+                <input type="checkbox" class="custom-control-input" id="shouldLink" name="shouldLink" {{$checked}}>
                 <label class="custom-control-label" for="shouldLink">Link this note to me</label>
                 <div class="custom-tooltip"><i class="fas fa-info-circle px-1"></i>
                     <span class="custom-tooltiptext">You can only edit and delete notes that are linked to you.</span>

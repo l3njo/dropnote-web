@@ -33,11 +33,13 @@
             {{range $i, $v := .Notes}}
             <tr {{if not .Visible -}} class="table-dark" {{- end}}>
                 <th scope="row" class="align-middle {{if not .Visible -}} table-dark {{- end}}">{{inc $i}}</th>
-                <td class="align-middle {{if not .Visible -}} table-dark {{- end}}">{{$v.Subject}}</td>
+                <td class="align-middle {{if not .Visible -}} table-dark {{- end}}">
+                    <a class="btn btn-link" href="/me/notes/ {{- $v.Voucher}}">{{$v.Subject}}</a>
+                </td>
                 <td class="align-middle {{if not .Visible -}} table-dark {{- end}}">{{$v.Content}}</td>
                 <td class="align-middle {{if not .Visible -}} table-dark {{- end}}">{{$v.Dropped}}</td>
                 <td class="align-middle {{if not .Visible -}} table-dark {{- end}}">
-                    <a href="/me/notes/update?note= {{- $v.Voucher}}" title="Edit" class="btn btn-link">
+                    <a href="/me/notes/update/ {{- $v.Voucher}}" title="Edit" class="btn btn-link">
                         <i class="far fa-edit"></i>
                     </a>
                     {{if $v.Visible}}

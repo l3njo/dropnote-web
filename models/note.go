@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	uuid "github.com/satori/go.uuid"
 )
@@ -16,6 +17,7 @@ type Note struct {
 	Subject string `json:"subject,omitempty"`
 	Content string `json:"content,omitempty"`
 	Dropped string `json:"created_at,omitempty"`
+	Creator string `json:"creator,omitempty"`
 	Visible bool   `json:"visible,omitempty"`
 }
 
@@ -133,6 +135,36 @@ func (n *Note) Toggle(auth string) error {
 	return nil
 }
 
+// Update updates the provided note
+func (n *Note) Update(auth string) error {
+	requestBody, err := json.Marshal(n)
+	if err != nil {
+		return err
+	}
+
+	url := fmt.Sprintf("%sme/notes/update/%s", api, n.Voucher)
+	request, err := http.NewRequest("PUT", url, bytes.NewBuffer(requestBody))
+	if err != nil {
+		return err
+	}
+
+	request.Header.Add("Authorization", fmt.Sprintf("Bearer %s", auth))
+	resp, err := http.DefaultClient.Do(request)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	result := &noteResult{}
+	json.NewDecoder(resp.Body).Decode(&result)
+	if !result.Status {
+		return errors.New(result.Message)
+	}
+
+	*n = result.Note
+	return nil
+}
+
 // Delete deletes the provided note
 func (n *Note) Delete(auth string) error {
 	url := fmt.Sprintf("%sme/notes/delete/%s", api, n.Voucher)
@@ -155,5 +187,15 @@ func (n *Note) Delete(auth string) error {
 	}
 
 	*n = Note{}
+	return nil
+}
+
+// ParseDate converts the date into a more readable format
+func (n *Note) ParseDate() error {
+	now, err := time.Parse("2006-01-02T15:04:05Z", n.Dropped)
+	if err != nil {
+		return err
+	}
+	n.Dropped = now.Format("2006-01-02 15:04:05")
 	return nil
 }

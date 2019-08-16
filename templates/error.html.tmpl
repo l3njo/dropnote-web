@@ -4,8 +4,9 @@
         <div class="notfound-404">
             <h1>{{.Title}}</h1>
         </div>
-        <h2>{{.Heading}}</h2>
-        <p>{{.Message}}</p>
+        {{$i := .Info}}
+        <h2>{{$i.Heading}}</h2>
+        <p>{{$i.Message}}</p>
         <a href="/">Back To Homepage</a>
     </div>
 </div>

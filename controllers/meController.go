@@ -4,8 +4,10 @@ import (
 	"html/template"
 	"net/http"
 	"path/filepath"
+	"strings"
 
 	"github.com/l3njo/dropnote-web/models"
+	uuid "github.com/satori/go.uuid"
 )
 
 // MeHandler handles the "/me" route.
@@ -13,7 +15,7 @@ func MeHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := store.Get(r, sessionCookie)
 	Handle(err)
 	isAuth := checkAuth(session)
-	data := info{Title: "Profile"}
+	data := Page{Title: "Profile"}
 	meta := filepath.Join("templates", "meta", "me.html.tmpl")
 	body := filepath.Join("templates", "me.html.tmpl")
 	if !isAuth {
@@ -35,11 +37,119 @@ func MeHandler(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
+// MyNotesHandler handles displaying details for one note
+func MyNotesHandler(w http.ResponseWriter, r *http.Request) {
+	session, err := store.Get(r, sessionCookie)
+	Handle(err)
+	isAuth := checkAuth(session)
+	data := Page{Title: "Profile"}
+	meta := filepath.Join("templates", "meta", "note.html.tmpl")
+	body := filepath.Join("templates", "note.html.tmpl")
+
+	if flashes := session.Flashes(); len(flashes) > 0 {
+		for _, v := range flashes {
+			data.Flashes = append(data.Flashes, *v.(*Flash))
+		}
+	}
+
+	if !isAuth {
+		data.Title, data.Heading = "403", "You can't access this!"
+		data.Message = "You are not allowed to access this content. Try signing up or logging in."
+		meta = filepath.Join("templates", "meta", "error.html.tmpl")
+		body = filepath.Join("templates", "error.html.tmpl")
+	} else {
+		user := session.Values["data"].(*models.User)
+		data.Name, data.Mail = user.Name, user.Mail
+		code := strings.TrimPrefix(r.URL.Path, "/me/notes/")
+		note := &models.Note{Voucher: code}
+		Handle(note.Get(user.Auth))
+		Handle(note.ParseDate())
+		data.Note = *note
+		Handle(err)
+		session.AddFlash(Flash{Message: "Note retrieved.", Status: true})
+	}
+
+	Handle(session.Save(r, w))
+	tmpl, err := template.ParseFiles(base, meta, body)
+	Handle(err)
+	tmpl.ExecuteTemplate(w, "layout", data)
+	return
+}
+
+// NoteUpdateHandler takes care of updating notes
+func NoteUpdateHandler(w http.ResponseWriter, r *http.Request) {
+	session, err := store.Get(r, sessionCookie)
+	Handle(err)
+	isAuth := checkAuth(session)
+	data := Page{Title: "Drop Note"}
+	meta := filepath.Join("templates", "meta", "drop.html.tmpl")
+	body := filepath.Join("templates", "dropnote.html.tmpl")
+	if !isAuth {
+		// HTTP 403
+		return
+	}
+
+	uData := session.Values["data"].(*models.User)
+	data.Name, data.Mail = uData.Name, uData.Mail
+	if flashes := session.Flashes(); len(flashes) > 0 {
+		for _, v := range flashes {
+			data.Flashes = append(data.Flashes, *v.(*Flash))
+		}
+	}
+
+	voucher := strings.TrimPrefix(r.URL.Path, "/me/notes/update/")
+	note := models.Note{Voucher: voucher}
+	Handle(note.Get(uData.Auth))
+	data.Note = note
+
+	if r.Method == "POST" {
+		r.ParseForm()
+		subject, content := r.Form["subject"][0], r.Form["content"][0]
+		creator := uuid.Nil.String()
+		if isAuth && len(r.Form["shouldLink"]) > 0 {
+			if shouldLink := r.Form["shouldLink"][0]; shouldLink == "on" {
+				if subject == note.Subject {
+					subject = ""
+				}
+				if content == note.Content {
+					content = ""
+				}
+
+				if unchanged := subject == "" && content == ""; unchanged {
+					// session.AddFlash(Flash{Message: "No fields have been changed"}) // FLASH
+					http.Redirect(w, r, "/me", http.StatusFound)
+					return
+				}
+				creator = uData.User
+			}
+		}
+
+		note.Subject, note.Content, note.Creator = subject, content, creator //TODO
+		if err := note.Update(uData.Auth); err != nil {
+			// session.AddFlash(Flash{Message: "Update failed.", Status: false}) // FLASH
+			data.Heading, data.Message = "Error!", err.Error()
+			meta = filepath.Join("templates", "meta", "info.html.tmpl")
+			body = filepath.Join("templates", "info.html.tmpl")
+		} else {
+			// session.AddFlash(Flash{Message: "Note saved.", Status: true}) // FLASH
+			Handle(session.Save(r, w))
+			http.Redirect(w, r, "/me", http.StatusFound)
+			return
+		}
+	}
+
+	Handle(session.Save(r, w))
+	tmpl, err := template.ParseFiles(base, meta, body)
+	Handle(err)
+	tmpl.ExecuteTemplate(w, "layout", data)
+	return
+}
+
 // NoteActionsHandler handles toggle and delete actions for notes
 func NoteActionsHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := store.Get(r, sessionCookie)
 	Handle(err)
-	data := info{Title: "403"}
+	data := Page{Title: "403"}
 	if checkAuth(session) {
 		uData := session.Values["data"].(*models.User)
 		if actions, ok := r.URL.Query()["a"]; ok && len(actions) > 0 {

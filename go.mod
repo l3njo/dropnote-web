@@ -7,4 +7,5 @@ require (
 	github.com/joho/godotenv v1.3.0
 	github.com/l3njo/dropnote-api v0.0.0-20190813121639-19f97b76735b // indirect
 	github.com/satori/go.uuid v1.2.0
+	github.com/skip2/go-qrcode v0.0.0-20190110000554-dc11ecdae0a9
 )

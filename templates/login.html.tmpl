@@ -2,14 +2,16 @@
 <div class="limiter">
     <div class="container-auth">
         <div class="wrap-auth">
-            {{range .Flash}}
-            <div class="alert alert-danger alert-dismissible fade show text-capitalize" role="alert">
-                <strong>Failed!</strong> {{.}}.
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            {{end}}
+                {{range $_, $v := .Flashes}}
+                {{$stat := "danger"}}
+                {{if $v.Status}}{{$stat = "success"}}{{end}}
+                <div class="alert alert- {{- $stat}} alert-dismissible fade show text-capitalize" role="alert">
+                    <strong>{{if $v.Status -}} Success {{- else -}} Failed {{- end -}} !</strong> {{$v.Message}}.
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                {{end}}
 
             <form class="auth-form" method="POST">
                 <span class="auth-form-title mb-3">Log In</span>

@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"html/template"
 	"net/http"
 	"path/filepath"
@@ -13,12 +12,12 @@ import (
 func SignupHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := store.Get(r, sessionCookie)
 	Handle(err)
-	data := info{Title: "Sign Up"}
+	data := Page{Title: "Sign Up"}
 	meta := filepath.Join("templates", "meta", "auth.html.tmpl")
 	body := filepath.Join("templates", "signup.html.tmpl")
 	if flashes := session.Flashes(); len(flashes) > 0 {
 		for _, v := range flashes {
-			data.Flash = append(data.Flash, fmt.Sprint(v))
+			data.Flashes = append(data.Flashes, *v.(*Flash))
 		}
 		Handle(session.Save(r, w))
 	}
@@ -34,10 +33,11 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 
 		next := "/signup"
 		if err := user.ValidateSignup(); err != nil {
-			session.AddFlash(err.Error())
+			session.AddFlash(Flash{Message: err.Error(), Status: false})
 		} else if err := user.TrySignup(); err != nil {
-			session.AddFlash(err.Error())
+			session.AddFlash(Flash{Message: err.Error(), Status: false})
 		} else {
+			// session.AddFlash(Flash{Message: "Signup successful.", Status: true}) // FLASH
 			session.Values["isAuth"] = true
 			session.Values["data"] = user
 			next = getNext(r)
@@ -57,12 +57,12 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := store.Get(r, sessionCookie)
 	Handle(err)
-	data := info{Title: "Log In"}
+	data := Page{Title: "Log In"}
 	meta := filepath.Join("templates", "meta", "auth.html.tmpl")
 	body := filepath.Join("templates", "login.html.tmpl")
 	if flashes := session.Flashes(); len(flashes) > 0 {
 		for _, v := range flashes {
-			data.Flash = append(data.Flash, fmt.Sprint(v))
+			data.Flashes = append(data.Flashes, *v.(*Flash))
 		}
 		Handle(session.Save(r, w))
 	}
@@ -76,8 +76,9 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 		next := "/login"
 		if err := user.TryLogin(); err != nil {
-			session.AddFlash(err.Error())
+			session.AddFlash(Flash{Message: err.Error(), Status: false})
 		} else {
+			// session.AddFlash(Flash{Message: "Login successful.", Status: true}) // FLASH
 			session.Values["isAuth"] = true
 			session.Values["data"] = user
 			next = getNext(r)
@@ -106,7 +107,7 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 
 // ResetHandler handles the "/reset" route.
 func ResetHandler(w http.ResponseWriter, r *http.Request) {
-	data := info{Title: "Reset Password"}
+	data := Page{Title: "Reset Password"}
 	meta := filepath.Join("templates", "meta", "auth.html.tmpl")
 	body := filepath.Join("templates", "reset.html.tmpl")
 	if r.Method == "POST" {

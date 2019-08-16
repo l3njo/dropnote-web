@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"time"
 )
 
 // NoteSlice represents an array of notes
@@ -48,11 +47,9 @@ func (u *User) GetNotes() ([]Note, error) {
 		if len(v.Content) > 20 {
 			v.Content = v.Content[:19] + "…"
 		}
-		now, err := time.Parse("2006-01-02T15:04:05Z", v.Dropped)
-		if err != nil {
+		if err := v.ParseDate(); err != nil {
 			return nil, err
 		}
-		v.Dropped = now.Format("2006-01-02 15:04:05")
 		notes = append(notes, v)
 	}
 

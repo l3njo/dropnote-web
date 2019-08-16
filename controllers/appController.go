@@ -26,7 +26,7 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := store.Get(r, sessionCookie)
 	Handle(err)
 	isAuth := checkAuth(session)
-	data := info{Title: "Home"}
+	data := Page{Title: "Home"}
 	meta := filepath.Join("templates", "meta", "home.html.tmpl")
 	body := filepath.Join("templates", "home.html.tmpl")
 	if isAuth {
@@ -52,12 +52,18 @@ func DropNoteHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := store.Get(r, sessionCookie)
 	Handle(err)
 	isAuth := checkAuth(session)
-	data := info{Title: "Drop Note"}
+	data := Page{Title: "Drop Note"}
 	meta := filepath.Join("templates", "meta", "drop.html.tmpl")
 	body := filepath.Join("templates", "dropnote.html.tmpl")
 	if isAuth {
 		uData := session.Values["data"].(*models.User)
 		data.Name, data.Mail = uData.Name, uData.Mail
+	}
+
+	if flashes := session.Flashes(); len(flashes) > 0 {
+		for _, v := range flashes {
+			data.Flashes = append(data.Flashes, *v.(*Flash))
+		}
 	}
 
 	if r.Method == "POST" {
@@ -76,16 +82,22 @@ func DropNoteHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if err := note.Post(auth); err != nil {
+			session.AddFlash(Flash{Message: "Save failed.", Status: false})
 			data.Heading, data.Message = "Error!", err.Error()
+			meta = filepath.Join("templates", "meta", "info.html.tmpl")
+			body = filepath.Join("templates", "info.html.tmpl")
 		} else {
-			voucher := note.Voucher
-			strOnSuccess := "Your note (%s) has been stored. Your code is %s. Here's a direct link: %sdropcode?voucher=%s."
-			data.Heading, data.Message = "Success!", fmt.Sprintf(strOnSuccess, note.Subject, voucher, site, voucher)
+			Handle(note.ParseDate())
+			data.Note = *note
+			session.AddFlash(Flash{Message: "Note saved.", Status: true})
+			Handle(session.Save(r, w))
+			url := fmt.Sprintf("%sdropcode?voucher=%s", site, note.Voucher)
+			http.Redirect(w, r, url, http.StatusFound)
+			return
 		}
-		meta = filepath.Join("templates", "meta", "info.html.tmpl")
-		body = filepath.Join("templates", "info.html.tmpl")
 	}
 
+	Handle(session.Save(r, w))
 	tmpl, err := template.ParseFiles(base, meta, body)
 	Handle(err)
 	tmpl.ExecuteTemplate(w, "layout", data)
@@ -98,7 +110,7 @@ func DropCodeHandler(w http.ResponseWriter, r *http.Request) {
 	Handle(err)
 	isAuth := checkAuth(session)
 	uData := &models.User{}
-	data := info{Title: "Drop Code"}
+	data := Page{Title: "Drop Code"}
 	meta := filepath.Join("templates", "meta", "drop.html.tmpl")
 	body := filepath.Join("templates", "dropcode.html.tmpl")
 	if isAuth {
@@ -106,25 +118,44 @@ func DropCodeHandler(w http.ResponseWriter, r *http.Request) {
 		data.Name, data.Mail = uData.Name, uData.Mail
 	}
 
+	if flashes := session.Flashes(); len(flashes) > 0 {
+		for _, v := range flashes {
+			data.Flashes = append(data.Flashes, *v.(*Flash))
+		}
+	}
+
 	if keys, ok := r.URL.Query()["voucher"]; ok && len(keys) > 0 {
 		note := &models.Note{Voucher: keys[0]}
 		if err := note.ValidateGet(); err != nil {
+			session.AddFlash(Flash{Message: "Retrieval failed.", Status: false})
 			data.Heading, data.Message = "Error!", err.Error()
+			meta = filepath.Join("templates", "meta", "info.html.tmpl")
+			body = filepath.Join("templates", "info.html.tmpl")
+		} else if err := note.Get(uData.Auth); err != nil {
+			session.AddFlash(Flash{Message: "Retrieval failed.", Status: false})
+			data.Heading, data.Message = "Error!", err.Error()
+			meta = filepath.Join("templates", "meta", "info.html.tmpl")
+			body = filepath.Join("templates", "info.html.tmpl")
+		} else if *note == (models.Note{}) {
+			session.AddFlash(Flash{Message: "Retrieval failed.", Status: false})
+			data.Heading, data.Message = "Error!", "That note does not exist"
+			meta = filepath.Join("templates", "meta", "info.html.tmpl")
+			body = filepath.Join("templates", "info.html.tmpl")
+		} else if uuid.Equal(uuid.FromStringOrNil(note.Voucher), uuid.Nil) {
+			session.AddFlash(Flash{Message: "Retrieval failed.", Status: false})
+			data.Heading, data.Message = "Error!", "That note does not exist"
+			meta = filepath.Join("templates", "meta", "info.html.tmpl")
+			body = filepath.Join("templates", "info.html.tmpl")
 		} else {
-			if err := note.Get(uData.Auth); err != nil {
-				data.Message = err.Error()
-			} else if *note == (models.Note{}) {
-				data.Message = "That note does not exist"
-			} else if uuid.Equal(uuid.FromStringOrNil(note.Voucher), uuid.Nil) {
-				data.Message = "That note does not exist"
-			} else {
-				data.Heading, data.Message = note.Subject, note.Content
-			}
+			Handle(note.ParseDate())
+			data.Note = *note
+			session.AddFlash(Flash{Message: "Note retrieved.", Status: true})
+			meta = filepath.Join("templates", "meta", "note.html.tmpl")
+			body = filepath.Join("templates", "note.html.tmpl")
 		}
-		meta = filepath.Join("templates", "meta", "info.html.tmpl")
-		body = filepath.Join("templates", "info.html.tmpl")
 	}
 
+	Handle(session.Save(r, w))
 	tmpl, err := template.ParseFiles(base, meta, body)
 	Handle(err)
 	tmpl.ExecuteTemplate(w, "layout", data)
