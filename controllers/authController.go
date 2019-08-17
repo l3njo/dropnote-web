@@ -12,7 +12,14 @@ import (
 func SignupHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := store.Get(r, sessionCookie)
 	Handle(err)
-	data := Page{Title: "Sign Up"}
+	data := Page{
+		Data: Data{
+			Title:       "Sign Up",
+			Site:        site,
+			Link:        r.URL.Path,
+			Description: "Sign Up for DropNote",
+		},
+	}
 	meta := filepath.Join("templates", "meta", "auth.html.tmpl")
 	body := filepath.Join("templates", "signup.html.tmpl")
 	if flashes := session.Flashes(); len(flashes) > 0 {
@@ -57,7 +64,14 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := store.Get(r, sessionCookie)
 	Handle(err)
-	data := Page{Title: "Log In"}
+	data := Page{
+		Data: Data{
+			Title:       "Log In",
+			Site:        site,
+			Link:        r.URL.Path,
+			Description: "Log In to DropNote",
+		},
+	}
 	meta := filepath.Join("templates", "meta", "auth.html.tmpl")
 	body := filepath.Join("templates", "login.html.tmpl")
 	if flashes := session.Flashes(); len(flashes) > 0 {
@@ -107,7 +121,14 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 
 // ResetHandler handles the "/reset" route.
 func ResetHandler(w http.ResponseWriter, r *http.Request) {
-	data := Page{Title: "Reset Password"}
+	data := Page{
+		Data: Data{
+			Title:       "Reset Password",
+			Site:        site,
+			Link:        r.URL.Path,
+			Description: "DropNote Password Reset",
+		},
+	}
 	meta := filepath.Join("templates", "meta", "auth.html.tmpl")
 	body := filepath.Join("templates", "reset.html.tmpl")
 	if r.Method == "POST" {

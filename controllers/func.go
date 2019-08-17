@@ -23,6 +23,11 @@ var (
 	store = sessions.NewCookieStore(key)
 )
 
+// Data stores page information
+type Data struct {
+	Title, Site, Link, Description string
+}
+
 // Flash stores flash messages
 type Flash struct {
 	Message string
@@ -36,7 +41,7 @@ type Info struct {
 
 // Page holds page data
 type Page struct {
-	Title string
+	Data
 	Info
 	Flashes []Flash
 	models.User

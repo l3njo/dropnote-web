@@ -26,7 +26,7 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := store.Get(r, sessionCookie)
 	Handle(err)
 	isAuth := checkAuth(session)
-	data := Page{Title: "Home"}
+	data := Page{Data: Data{Title: "Home", Site: site, Link: r.URL.Path, Description: "DropNote Home"}}
 	meta := filepath.Join("templates", "meta", "home.html.tmpl")
 	body := filepath.Join("templates", "home.html.tmpl")
 	if isAuth {
@@ -52,7 +52,7 @@ func DropNoteHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := store.Get(r, sessionCookie)
 	Handle(err)
 	isAuth := checkAuth(session)
-	data := Page{Title: "Drop Note"}
+	data := Page{Data: Data{Title: "Drop Note", Site: site, Link: r.URL.Path, Description: "Drop a Note"}}
 	meta := filepath.Join("templates", "meta", "drop.html.tmpl")
 	body := filepath.Join("templates", "dropnote.html.tmpl")
 	if isAuth {
@@ -110,7 +110,7 @@ func DropCodeHandler(w http.ResponseWriter, r *http.Request) {
 	Handle(err)
 	isAuth := checkAuth(session)
 	uData := &models.User{}
-	data := Page{Title: "Drop Code"}
+	data := Page{Data: Data{Title: "Drop Code", Site: site, Link: r.URL.Path, Description: "Drop a Code"}}
 	meta := filepath.Join("templates", "meta", "drop.html.tmpl")
 	body := filepath.Join("templates", "dropcode.html.tmpl")
 	if isAuth {

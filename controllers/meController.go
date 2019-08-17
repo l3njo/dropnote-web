@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"html/template"
 	"net/http"
 	"path/filepath"
@@ -15,7 +16,14 @@ func MeHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := store.Get(r, sessionCookie)
 	Handle(err)
 	isAuth := checkAuth(session)
-	data := Page{Title: "Profile"}
+	data := Page{
+		Data: Data{
+			Title:       "Profile",
+			Site:        site,
+			Link:        r.URL.Path,
+			Description: "My DropNote Profile",
+		},
+	}
 	meta := filepath.Join("templates", "meta", "me.html.tmpl")
 	body := filepath.Join("templates", "me.html.tmpl")
 	if !isAuth {
@@ -42,7 +50,14 @@ func MyNotesHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := store.Get(r, sessionCookie)
 	Handle(err)
 	isAuth := checkAuth(session)
-	data := Page{Title: "Profile"}
+	data := Page{
+		Data: Data{
+			Title:       "Note Details",
+			Site:        site,
+			Link:        r.URL.Path,
+			Description: "View note details.",
+		},
+	}
 	meta := filepath.Join("templates", "meta", "note.html.tmpl")
 	body := filepath.Join("templates", "note.html.tmpl")
 
@@ -61,6 +76,7 @@ func MyNotesHandler(w http.ResponseWriter, r *http.Request) {
 		user := session.Values["data"].(*models.User)
 		data.Name, data.Mail = user.Name, user.Mail
 		code := strings.TrimPrefix(r.URL.Path, "/me/notes/")
+		data.Description = fmt.Sprintf(data.Description, code)
 		note := &models.Note{Voucher: code}
 		Handle(note.Get(user.Auth))
 		Handle(note.ParseDate())
@@ -81,7 +97,14 @@ func NoteUpdateHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := store.Get(r, sessionCookie)
 	Handle(err)
 	isAuth := checkAuth(session)
-	data := Page{Title: "Drop Note"}
+	data := Page{
+		Data: Data{
+			Title:       "Edit Note",
+			Site:        site,
+			Link:        r.URL.Path,
+			Description: "Edit a Note",
+		},
+	}
 	meta := filepath.Join("templates", "meta", "drop.html.tmpl")
 	body := filepath.Join("templates", "dropnote.html.tmpl")
 	if !isAuth {
@@ -156,7 +179,14 @@ func NoteUpdateHandler(w http.ResponseWriter, r *http.Request) {
 func NoteActionsHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := store.Get(r, sessionCookie)
 	Handle(err)
-	data := Page{Title: "403"}
+	data := Page{
+		Data: Data{
+			Title:       "Note Actions",
+			Site:        site,
+			Link:        r.URL.Path,
+			Description: "Make changes to a note.",
+		},
+	}
 	if checkAuth(session) {
 		uData := session.Values["data"].(*models.User)
 		if actions, ok := r.URL.Query()["a"]; ok && len(actions) > 0 {
