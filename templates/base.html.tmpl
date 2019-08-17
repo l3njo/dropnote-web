@@ -66,6 +66,20 @@
                 </ul>
             </div>
         </nav>
+        <div class="w-100">
+            {{range $_, $v := .Flashes}}
+            {{if not $v.Custom}}
+            {{$stat := "danger"}}
+            {{if $v.Status}}{{$stat = "success"}}{{end}}
+            <div class="alert alert- {{- $stat}} alert-dismissible fade show" role="alert">
+                <strong>{{if $v.Status -}} Success {{- else -}} Failed {{- end -}} !</strong> {{$v.Message}}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <i class="far fa-times-circle"></i>
+                </button>
+            </div>
+            {{end}}
+            {{end}}
+        </div>
     </header>
     <main role="main" class="flex-shrink-0">
         {{ template "content" .}}

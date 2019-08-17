@@ -82,7 +82,7 @@ func DropNoteHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if err := note.Post(auth); err != nil {
-			session.AddFlash(Flash{Message: "Save failed.", Status: false})
+			session.AddFlash(Flash{Message: "Save failed."})
 			data.Heading, data.Message = "Error!", err.Error()
 			meta = filepath.Join("templates", "meta", "info.html.tmpl")
 			body = filepath.Join("templates", "info.html.tmpl")
@@ -127,22 +127,22 @@ func DropCodeHandler(w http.ResponseWriter, r *http.Request) {
 	if keys, ok := r.URL.Query()["voucher"]; ok && len(keys) > 0 {
 		note := &models.Note{Voucher: keys[0]}
 		if err := note.ValidateGet(); err != nil {
-			session.AddFlash(Flash{Message: "Retrieval failed.", Status: false})
+			session.AddFlash(Flash{Message: "Retrieval failed."})
 			data.Heading, data.Message = "Error!", err.Error()
 			meta = filepath.Join("templates", "meta", "info.html.tmpl")
 			body = filepath.Join("templates", "info.html.tmpl")
 		} else if err := note.Get(uData.Auth); err != nil {
-			session.AddFlash(Flash{Message: "Retrieval failed.", Status: false})
+			session.AddFlash(Flash{Message: "Retrieval failed."})
 			data.Heading, data.Message = "Error!", err.Error()
 			meta = filepath.Join("templates", "meta", "info.html.tmpl")
 			body = filepath.Join("templates", "info.html.tmpl")
 		} else if *note == (models.Note{}) {
-			session.AddFlash(Flash{Message: "Retrieval failed.", Status: false})
+			session.AddFlash(Flash{Message: "Retrieval failed."})
 			data.Heading, data.Message = "Error!", "That note does not exist"
 			meta = filepath.Join("templates", "meta", "info.html.tmpl")
 			body = filepath.Join("templates", "info.html.tmpl")
 		} else if uuid.Equal(uuid.FromStringOrNil(note.Voucher), uuid.Nil) {
-			session.AddFlash(Flash{Message: "Retrieval failed.", Status: false})
+			session.AddFlash(Flash{Message: "Retrieval failed."})
 			data.Heading, data.Message = "Error!", "That note does not exist"
 			meta = filepath.Join("templates", "meta", "info.html.tmpl")
 			body = filepath.Join("templates", "info.html.tmpl")

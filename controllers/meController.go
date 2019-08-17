@@ -85,7 +85,13 @@ func NoteUpdateHandler(w http.ResponseWriter, r *http.Request) {
 	meta := filepath.Join("templates", "meta", "drop.html.tmpl")
 	body := filepath.Join("templates", "dropnote.html.tmpl")
 	if !isAuth {
-		// HTTP 403
+		data.Title, data.Heading = "403", "You can't access this!"
+		data.Message = "You are not allowed to access this content. Try signing up or logging in."
+		meta = filepath.Join("templates", "meta", "error.html.tmpl")
+		body = filepath.Join("templates", "error.html.tmpl")
+		tmpl, err := template.ParseFiles(base, meta, body)
+		Handle(err)
+		tmpl.ExecuteTemplate(w, "layout", data)
 		return
 	}
 
@@ -116,7 +122,8 @@ func NoteUpdateHandler(w http.ResponseWriter, r *http.Request) {
 				}
 
 				if unchanged := subject == "" && content == ""; unchanged {
-					// session.AddFlash(Flash{Message: "No fields have been changed"}) // FLASH
+					session.AddFlash(Flash{Message: "No fields have been changed"})
+					Handle(session.Save(r, w))
 					http.Redirect(w, r, "/me", http.StatusFound)
 					return
 				}
@@ -126,12 +133,12 @@ func NoteUpdateHandler(w http.ResponseWriter, r *http.Request) {
 
 		note.Subject, note.Content = subject, content
 		if err := note.Update(uData.Auth); err != nil {
-			// session.AddFlash(Flash{Message: "Update failed.", Status: false}) // FLASH
+			session.AddFlash(Flash{Message: "Update failed."})
 			data.Heading, data.Message = "Error!", err.Error()
 			meta = filepath.Join("templates", "meta", "info.html.tmpl")
 			body = filepath.Join("templates", "info.html.tmpl")
 		} else {
-			// session.AddFlash(Flash{Message: "Note saved.", Status: true}) // FLASH
+			session.AddFlash(Flash{Message: "Note saved.", Status: true})
 			Handle(session.Save(r, w))
 			http.Redirect(w, r, "/me", http.StatusFound)
 			return

@@ -26,7 +26,7 @@ var (
 // Flash stores flash messages
 type Flash struct {
 	Message string
-	Status  bool
+	Status, Custom  bool
 }
 
 // Info holds data for informational pages

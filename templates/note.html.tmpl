@@ -1,20 +1,6 @@
 {{define "content"}}
 {{$n := .Note}}
 <div class="container py-3">
-    <div class="row justify-content-end">
-        <div class="col-3 col-md-4 col-sm-12">
-            {{range $_, $v := .Flashes}}
-            {{$stat := "danger"}}
-            {{if $v.Status}}{{$stat = "success"}}{{end}}
-            <div class="alert alert- {{- $stat}} alert-dismissible fade show" role="alert">
-                <strong>{{if $v.Status -}} Success {{- else -}} Failed {{- end -}} !</strong> {{$v.Message}}
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            {{end}}
-        </div>
-    </div>
     <h6 class="display-4">{{$n.Subject}}<br>
         <p class="lead text-muted">{{$n.Voucher}}<br>{{$n.Dropped}}</p>
     </h6>

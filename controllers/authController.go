@@ -33,11 +33,11 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 
 		next := "/signup"
 		if err := user.ValidateSignup(); err != nil {
-			session.AddFlash(Flash{Message: err.Error(), Status: false})
+			session.AddFlash(Flash{Message: err.Error(), Custom: true})
 		} else if err := user.TrySignup(); err != nil {
-			session.AddFlash(Flash{Message: err.Error(), Status: false})
+			session.AddFlash(Flash{Message: err.Error(), Custom: true})
 		} else {
-			// session.AddFlash(Flash{Message: "Signup successful.", Status: true}) // FLASH
+			session.AddFlash(Flash{Message: "Signup successful.", Status: true})
 			session.Values["isAuth"] = true
 			session.Values["data"] = user
 			next = getNext(r)
@@ -76,9 +76,9 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 		next := "/login"
 		if err := user.TryLogin(); err != nil {
-			session.AddFlash(Flash{Message: err.Error(), Status: false})
+			session.AddFlash(Flash{Message: err.Error(), Custom: true})
 		} else {
-			// session.AddFlash(Flash{Message: "Login successful.", Status: true}) // FLASH
+			session.AddFlash(Flash{Message: "Login successful.", Status: true})
 			session.Values["isAuth"] = true
 			session.Values["data"] = user
 			next = getNext(r)
