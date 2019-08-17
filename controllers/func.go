@@ -15,7 +15,6 @@ import (
 const (
 	sessionCookie = "session-cookie"
 	site          = "https://drop-note.herokuapp.com/"
-	api           = "https://dropnote-api.herokuapp.com/api/"
 )
 
 var (

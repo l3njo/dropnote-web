@@ -91,7 +91,7 @@ func DropNoteHandler(w http.ResponseWriter, r *http.Request) {
 			data.Note = *note
 			session.AddFlash(Flash{Message: "Note saved.", Status: true})
 			Handle(session.Save(r, w))
-			url := fmt.Sprintf("%sdropcode?voucher=%s", site, note.Voucher)
+			url := fmt.Sprintf("/dropcode?voucher=%s", note.Voucher)
 			http.Redirect(w, r, url, http.StatusFound)
 			return
 		}

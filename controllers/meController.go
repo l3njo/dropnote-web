@@ -105,7 +105,7 @@ func NoteUpdateHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		r.ParseForm()
 		subject, content := r.Form["subject"][0], r.Form["content"][0]
-		creator := uuid.Nil.String()
+		note.Creator = uuid.Nil.String()
 		if isAuth && len(r.Form["shouldLink"]) > 0 {
 			if shouldLink := r.Form["shouldLink"][0]; shouldLink == "on" {
 				if subject == note.Subject {
@@ -120,11 +120,11 @@ func NoteUpdateHandler(w http.ResponseWriter, r *http.Request) {
 					http.Redirect(w, r, "/me", http.StatusFound)
 					return
 				}
-				creator = uData.User
+				note.Creator = uData.User
 			}
 		}
 
-		note.Subject, note.Content, note.Creator = subject, content, creator //TODO
+		note.Subject, note.Content = subject, content
 		if err := note.Update(uData.Auth); err != nil {
 			// session.AddFlash(Flash{Message: "Update failed.", Status: false}) // FLASH
 			data.Heading, data.Message = "Error!", err.Error()
