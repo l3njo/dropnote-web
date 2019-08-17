@@ -14,7 +14,7 @@ func QRHandler(w http.ResponseWriter, r *http.Request) {
 	if !isUUID(code) {
 		return
 	}
-	code = fmt.Sprintf("%sdropcode?voucher=%s", site, code)
+	code = fmt.Sprintf("%s/dropcode?voucher=%s", site, code)
 	qr, err := qrcode.Encode(code, qrcode.Medium, 256)
 	Handle(err)
 	w.WriteHeader(http.StatusOK)

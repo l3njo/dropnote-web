@@ -139,7 +139,8 @@ func ResetHandler(w http.ResponseWriter, r *http.Request) {
 
 		if err := models.TryReset(r.Form["mail"][0]); err != nil {
 			Handle(err)
-			data.Heading, data.Message = "Error!", "Something has gone horribly wrong."
+			displayHTTPError(w, r, http.StatusInternalServerError)
+			return
 		}
 	}
 

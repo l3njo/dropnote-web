@@ -35,10 +35,8 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.URL.Path != "/" && r.URL.Path != "/home" {
-		data.Title, data.Heading = "404", "We are sorry, Page not found!"
-		data.Message = "The page you are looking for might have been removed had its name changed or is temporarily unavailable."
-		meta = filepath.Join("templates", "meta", "error.html.tmpl")
-		body = filepath.Join("templates", "error.html.tmpl")
+		displayHTTPError(w, r, http.StatusNotFound)
+		return
 	}
 
 	tmpl, err := template.ParseFiles(base, meta, body)
@@ -52,7 +50,14 @@ func DropNoteHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := store.Get(r, sessionCookie)
 	Handle(err)
 	isAuth := checkAuth(session)
-	data := Page{Data: Data{Title: "Drop Note", Site: site, Link: r.URL.Path, Description: "Drop a Note"}}
+	data := Page{
+		Data: Data{
+			Title:       "Drop Note",
+			Site:        site,
+			Link:        r.URL.Path,
+			Description: "Drop a Note",
+		},
+	}
 	meta := filepath.Join("templates", "meta", "drop.html.tmpl")
 	body := filepath.Join("templates", "dropnote.html.tmpl")
 	if isAuth {
@@ -82,19 +87,19 @@ func DropNoteHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if err := note.Post(auth); err != nil {
+			Handle(err)
 			session.AddFlash(Flash{Message: "Save failed."})
-			data.Heading, data.Message = "Error!", err.Error()
-			meta = filepath.Join("templates", "meta", "info.html.tmpl")
-			body = filepath.Join("templates", "info.html.tmpl")
-		} else {
-			Handle(note.ParseDate())
-			data.Note = *note
-			session.AddFlash(Flash{Message: "Note saved.", Status: true})
 			Handle(session.Save(r, w))
-			url := fmt.Sprintf("/dropcode?voucher=%s", note.Voucher)
-			http.Redirect(w, r, url, http.StatusFound)
+			displayHTTPError(w, r, http.StatusInternalServerError)
 			return
 		}
+		Handle(note.ParseDate())
+		data.Note = *note
+		session.AddFlash(Flash{Message: "Note saved.", Status: true})
+		Handle(session.Save(r, w))
+		url := fmt.Sprintf("/dropcode?voucher=%s", note.Voucher)
+		http.Redirect(w, r, url, http.StatusFound)
+		return
 	}
 
 	Handle(session.Save(r, w))
@@ -110,7 +115,15 @@ func DropCodeHandler(w http.ResponseWriter, r *http.Request) {
 	Handle(err)
 	isAuth := checkAuth(session)
 	uData := &models.User{}
-	data := Page{Data: Data{Title: "Drop Code", Site: site, Link: r.URL.Path, Description: "Drop a Code"}}
+	data := Page{
+		Data: Data{
+			Title:       "Drop Code",
+			Site:        site,
+			Link:        r.URL.Path,
+			Description: "Drop a Code",
+		},
+	}
+
 	meta := filepath.Join("templates", "meta", "drop.html.tmpl")
 	body := filepath.Join("templates", "dropcode.html.tmpl")
 	if isAuth {
@@ -132,10 +145,11 @@ func DropCodeHandler(w http.ResponseWriter, r *http.Request) {
 			meta = filepath.Join("templates", "meta", "info.html.tmpl")
 			body = filepath.Join("templates", "info.html.tmpl")
 		} else if err := note.Get(uData.Auth); err != nil {
+			Handle(err)
 			session.AddFlash(Flash{Message: "Retrieval failed."})
-			data.Heading, data.Message = "Error!", err.Error()
-			meta = filepath.Join("templates", "meta", "info.html.tmpl")
-			body = filepath.Join("templates", "info.html.tmpl")
+			Handle(session.Save(r, w))
+			displayHTTPError(w, r, http.StatusInternalServerError)
+			return
 		} else if *note == (models.Note{}) {
 			session.AddFlash(Flash{Message: "Retrieval failed."})
 			data.Heading, data.Message = "Error!", "That note does not exist"

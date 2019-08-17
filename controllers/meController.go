@@ -27,17 +27,13 @@ func MeHandler(w http.ResponseWriter, r *http.Request) {
 	meta := filepath.Join("templates", "meta", "me.html.tmpl")
 	body := filepath.Join("templates", "me.html.tmpl")
 	if !isAuth {
-		data.Title, data.Heading = "403", "You can't access this!"
-		data.Message = "You are not allowed to access this content. Try signing up or logging in."
-		meta = filepath.Join("templates", "meta", "error.html.tmpl")
-		body = filepath.Join("templates", "error.html.tmpl")
-	} else {
-		user := session.Values["data"].(*models.User)
-		data.Name, data.Mail = user.Name, user.Mail
-		data.Notes, err = user.GetNotes()
-		Handle(err)
+		displayHTTPError(w, r, http.StatusForbidden)
+		return
 	}
-
+	user := session.Values["data"].(*models.User)
+	data.Name, data.Mail = user.Name, user.Mail
+	data.Notes, err = user.GetNotes()
+	Handle(err)
 	tmpl, err := template.New("me.html").Funcs(funcMap).ParseFiles(base, meta, body)
 	Handle(err)
 	err = tmpl.ExecuteTemplate(w, "layout", data)
@@ -68,23 +64,17 @@ func MyNotesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !isAuth {
-		data.Title, data.Heading = "403", "You can't access this!"
-		data.Message = "You are not allowed to access this content. Try signing up or logging in."
-		meta = filepath.Join("templates", "meta", "error.html.tmpl")
-		body = filepath.Join("templates", "error.html.tmpl")
-	} else {
-		user := session.Values["data"].(*models.User)
-		data.Name, data.Mail = user.Name, user.Mail
-		code := strings.TrimPrefix(r.URL.Path, "/me/notes/")
-		data.Description = fmt.Sprintf(data.Description, code)
-		note := &models.Note{Voucher: code}
-		Handle(note.Get(user.Auth))
-		Handle(note.ParseDate())
-		data.Note = *note
-		Handle(err)
-		session.AddFlash(Flash{Message: "Note retrieved.", Status: true})
+		displayHTTPError(w, r, http.StatusForbidden)
+		return
 	}
-
+	user := session.Values["data"].(*models.User)
+	code := strings.TrimPrefix(r.URL.Path, "/me/notes/")
+	note := &models.Note{Voucher: code}
+	data.Name, data.Mail, data.Description = user.Name, user.Mail, fmt.Sprintf(data.Description, code)
+	Handle(note.Get(user.Auth))
+	Handle(note.ParseDate())
+	data.Note = *note
+	session.AddFlash(Flash{Message: "Note retrieved.", Status: true})
 	Handle(session.Save(r, w))
 	tmpl, err := template.ParseFiles(base, meta, body)
 	Handle(err)
@@ -108,13 +98,7 @@ func NoteUpdateHandler(w http.ResponseWriter, r *http.Request) {
 	meta := filepath.Join("templates", "meta", "drop.html.tmpl")
 	body := filepath.Join("templates", "dropnote.html.tmpl")
 	if !isAuth {
-		data.Title, data.Heading = "403", "You can't access this!"
-		data.Message = "You are not allowed to access this content. Try signing up or logging in."
-		meta = filepath.Join("templates", "meta", "error.html.tmpl")
-		body = filepath.Join("templates", "error.html.tmpl")
-		tmpl, err := template.ParseFiles(base, meta, body)
-		Handle(err)
-		tmpl.ExecuteTemplate(w, "layout", data)
+		displayHTTPError(w, r, http.StatusForbidden)
 		return
 	}
 
@@ -156,16 +140,16 @@ func NoteUpdateHandler(w http.ResponseWriter, r *http.Request) {
 
 		note.Subject, note.Content = subject, content
 		if err := note.Update(uData.Auth); err != nil {
+			Handle(err)
 			session.AddFlash(Flash{Message: "Update failed."})
-			data.Heading, data.Message = "Error!", err.Error()
-			meta = filepath.Join("templates", "meta", "info.html.tmpl")
-			body = filepath.Join("templates", "info.html.tmpl")
-		} else {
-			session.AddFlash(Flash{Message: "Note saved.", Status: true})
 			Handle(session.Save(r, w))
-			http.Redirect(w, r, "/me", http.StatusFound)
+			displayHTTPError(w, r, http.StatusInternalServerError)
 			return
 		}
+		session.AddFlash(Flash{Message: "Note saved.", Status: true})
+		Handle(session.Save(r, w))
+		http.Redirect(w, r, "/me", http.StatusFound)
+		return
 	}
 
 	Handle(session.Save(r, w))
@@ -179,14 +163,6 @@ func NoteUpdateHandler(w http.ResponseWriter, r *http.Request) {
 func NoteActionsHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := store.Get(r, sessionCookie)
 	Handle(err)
-	data := Page{
-		Data: Data{
-			Title:       "Note Actions",
-			Site:        site,
-			Link:        r.URL.Path,
-			Description: "Make changes to a note.",
-		},
-	}
 	if checkAuth(session) {
 		uData := session.Values["data"].(*models.User)
 		if actions, ok := r.URL.Query()["a"]; ok && len(actions) > 0 {
@@ -205,13 +181,6 @@ func NoteActionsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	data.Title, data.Heading = "403", "You can't access this!"
-	data.Message = "You are not allowed to access this content. Try signing up or logging in."
-	meta := filepath.Join("templates", "meta", "error.html.tmpl")
-	body := filepath.Join("templates", "error.html.tmpl")
-	tmpl, err := template.New("me.html").Funcs(funcMap).ParseFiles(base, meta, body)
-	Handle(err)
-	err = tmpl.ExecuteTemplate(w, "layout", data)
-	Handle(err)
+	displayHTTPError(w, r, http.StatusForbidden)
 	return
 }
