@@ -57,8 +57,7 @@ const (
 
 var (
 	base       = filepath.Join("templates", "base.html.tmpl")
-	key        = []byte(os.Getenv("AES_KEY"))
-	store      = sessions.NewCookieStore(key)
+	store      = sessions.NewCookieStore([]byte(os.Getenv("OLD_AUTH_KEY")), nil, []byte(os.Getenv("NEW_AUTH_KEY")), nil)
 	httpErrors = map[int]Info{
 		http.StatusNotFound: Info{
 			Heading: "Sorry, we can't find that.",
