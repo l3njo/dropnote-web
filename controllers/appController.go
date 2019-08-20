@@ -39,6 +39,11 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if informed, ok := session.Values["isInformed"].(bool); !ok || !informed {
+		data.Flashes = append(data.Flashes, Flash{Message: "Have a cookie! This site uses cookies to personalize your experience.", Status: info})
+		session.Values["isInformed"] = true
+	}
+
 	if flashes := session.Flashes(); len(flashes) > 0 {
 		for _, v := range flashes {
 			data.Flashes = append(data.Flashes, *v.(*Flash))
@@ -72,6 +77,11 @@ func DropNoteHandler(w http.ResponseWriter, r *http.Request) {
 		data.Name, data.Mail = uData.Name, uData.Mail
 	}
 
+	if informed, ok := session.Values["isInformed"].(bool); !ok || !informed {
+		data.Flashes = append(data.Flashes, Flash{Message: "Have a cookie! This site uses cookies to personalize your experience.", Status: info})
+		session.Values["isInformed"] = true
+	}
+
 	if flashes := session.Flashes(); len(flashes) > 0 {
 		for _, v := range flashes {
 			data.Flashes = append(data.Flashes, *v.(*Flash))
@@ -95,14 +105,14 @@ func DropNoteHandler(w http.ResponseWriter, r *http.Request) {
 
 		if err := note.Post(auth); err != nil {
 			Handle(err)
-			session.AddFlash(Flash{Message: "Save failed."})
+			session.AddFlash(Flash{Message: "Save failed.", Status: warning})
 			Handle(session.Save(r, w))
 			displayHTTPError(w, r, http.StatusInternalServerError)
 			return
 		}
 		Handle(note.ParseDate())
 		data.Note = *note
-		session.AddFlash(Flash{Message: "Note saved.", Status: true})
+		session.AddFlash(Flash{Message: "Note saved.", Status: success})
 		Handle(session.Save(r, w))
 		http.Redirect(w, r, fmt.Sprintf("/dropcode?voucher=%s", note.Voucher), http.StatusFound)
 		return
@@ -137,6 +147,11 @@ func DropCodeHandler(w http.ResponseWriter, r *http.Request) {
 		data.Name, data.Mail = uData.Name, uData.Mail
 	}
 
+	if informed, ok := session.Values["isInformed"].(bool); !ok || !informed {
+		data.Flashes = append(data.Flashes, Flash{Message: "Have a cookie! This site uses cookies to personalize your experience.", Status: info})
+		session.Values["isInformed"] = true
+	}
+
 	if flashes := session.Flashes(); len(flashes) > 0 {
 		for _, v := range flashes {
 			data.Flashes = append(data.Flashes, *v.(*Flash))
@@ -146,30 +161,30 @@ func DropCodeHandler(w http.ResponseWriter, r *http.Request) {
 	if keys, ok := r.URL.Query()["voucher"]; ok && len(keys) > 0 {
 		note := &models.Note{Voucher: keys[0]}
 		if err := note.ValidateGet(); err != nil {
-			session.AddFlash(Flash{Message: "Retrieval failed."})
+			session.AddFlash(Flash{Message: "Retrieval failed.", Status: warning})
 			data.Heading, data.Message = "Error!", err.Error()
 			meta = filepath.Join("templates", "meta", "info.html.tmpl")
 			body = filepath.Join("templates", "info.html.tmpl")
 		} else if err := note.Get(uData.Auth); err != nil {
 			Handle(err)
-			session.AddFlash(Flash{Message: "Retrieval failed."})
+			session.AddFlash(Flash{Message: "Retrieval failed.", Status: warning})
 			Handle(session.Save(r, w))
 			displayHTTPError(w, r, http.StatusInternalServerError)
 			return
 		} else if *note == (models.Note{}) {
-			session.AddFlash(Flash{Message: "Retrieval failed."})
+			session.AddFlash(Flash{Message: "Retrieval failed.", Status: warning})
 			data.Heading, data.Message = "Error!", "That note does not exist"
 			meta = filepath.Join("templates", "meta", "info.html.tmpl")
 			body = filepath.Join("templates", "info.html.tmpl")
 		} else if uuid.Equal(uuid.FromStringOrNil(note.Voucher), uuid.Nil) {
-			session.AddFlash(Flash{Message: "Retrieval failed."})
+			session.AddFlash(Flash{Message: "Retrieval failed.", Status: warning})
 			data.Heading, data.Message = "Error!", "That note does not exist"
 			meta = filepath.Join("templates", "meta", "info.html.tmpl")
 			body = filepath.Join("templates", "info.html.tmpl")
 		} else {
 			Handle(note.ParseDate())
 			data.Note = *note
-			session.AddFlash(Flash{Message: "Note retrieved.", Status: true})
+			session.AddFlash(Flash{Message: "Note retrieved.", Status: success})
 			meta = filepath.Join("templates", "meta", "note.html.tmpl")
 			body = filepath.Join("templates", "note.html.tmpl")
 		}

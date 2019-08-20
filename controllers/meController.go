@@ -54,7 +54,7 @@ func MyActionsHandler(w http.ResponseWriter, r *http.Request) {
 		case "delete":
 			if err := user.TryDelete(); err != nil {
 				Handle(err)
-				session.AddFlash(Flash{Message: "Account delete failed."})
+				session.AddFlash(Flash{Message: "Account delete failed.", Status: warning})
 				Handle(session.Save(r, w))
 				displayHTTPError(w, r, http.StatusInternalServerError)
 				return
@@ -65,7 +65,7 @@ func MyActionsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	session.AddFlash(Flash{Message: "Account deleted.", Status: true})
+	session.AddFlash(Flash{Message: "Account deleted.", Status: success})
 	Handle(session.Save(r, w))
 	http.Redirect(w, r, "/logout", http.StatusFound)
 	return

@@ -14,6 +14,15 @@ import (
 	"github.com/gorilla/sessions"
 )
 
+type flashStatus string
+
+const (
+	info    flashStatus = "info"
+	warning flashStatus = "warning"
+	danger  flashStatus = "danger"
+	success flashStatus = "success"
+)
+
 // Data stores page information
 type Data struct {
 	Title, Site, Link, Description string
@@ -21,8 +30,9 @@ type Data struct {
 
 // Flash stores flash messages
 type Flash struct {
-	Message        string
-	Status, Custom bool
+	Message string
+	Status  flashStatus
+	Custom  bool
 }
 
 // Info holds data for informational pages
