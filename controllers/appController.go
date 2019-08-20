@@ -26,7 +26,15 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := store.Get(r, sessionCookie)
 	Handle(err)
 	isAuth := checkAuth(session)
-	data := Page{Data: Data{Title: "Home", Site: site, Link: r.URL.Path, Description: "DropNote Home"}}
+	data := Page{
+		Data: Data{
+			Title:       "Home",
+			Site:        site,
+			Link:        r.URL.Path,
+			Description: "DropNote Home",
+		},
+	}
+
 	meta := filepath.Join("templates", "meta", "home.html.tmpl")
 	body := filepath.Join("templates", "home.html.tmpl")
 	if isAuth {

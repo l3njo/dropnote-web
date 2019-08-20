@@ -44,10 +44,10 @@ type Info struct {
 type Page struct {
 	Data
 	Info
-	Flashes []Flash
-	models.User
-	models.Note
-	Notes []models.Note
+	Flashes     []Flash
+	models.User `json:"-"`
+	models.Note `json:"-"`
+	Notes       []models.Note
 }
 
 const (

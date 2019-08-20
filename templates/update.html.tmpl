@@ -11,21 +11,23 @@
             </div>
             {{end}}
 
+            {{$d := .Data}}
+            {{$u := .User}}
             <form class="auth-form" method="POST">
-                <span class="auth-form-title mb-3">Sign Up</span>
-
+                <span class="auth-form-title mb-3">{{$d.Title}}</span>
+                {{if eq $d.Title "Change Email"}}
                 <div class="wrap-auth-input  mb-3">
-                    <input class="auth-input" type="text" name="name" placeholder="Username" required>
+                    <input class="auth-input" type="email" name="mail" placeholder="{{$u.Mail}}">
+                    <span class="focus-auth-input"></span>
+                </div>
+                {{else}}
+                <div class="wrap-auth-input  mb-3">
+                    <input class="auth-input" type="password" name="current" placeholder="Current Password" minlength="8" required>
                     <span class="focus-auth-input"></span>
                 </div>
 
                 <div class="wrap-auth-input  mb-3">
-                    <input class="auth-input" type="email" name="mail" placeholder="Email Address" required>
-                    <span class="focus-auth-input"></span>
-                </div>
-
-                <div class="wrap-auth-input  mb-3">
-                    <input class="auth-input" type="password" name="pass" placeholder="Password" minlength="8" required>
+                    <input class="auth-input" type="password" name="updated" placeholder="Updated Password" required>
                     <span class="focus-auth-input"></span>
                 </div>
 
@@ -33,9 +35,9 @@
                     <input class="auth-input" type="password" name="confirm" placeholder="Confirm Password" required>
                     <span class="focus-auth-input"></span>
                 </div>
-
+                {{end}}
                 <div class="container-auth-form-btn mb-3">
-                    <button class="auth-form-btn">Sign Up</button>
+                    <button class="auth-form-btn">Submit</button>
                 </div>
             </form>
         </div>

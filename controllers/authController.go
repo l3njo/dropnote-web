@@ -97,6 +97,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			session.Values["data"] = user
 			next = getNext(r)
 		}
+
 		Handle(session.Save(r, w))
 		http.Redirect(w, r, next, http.StatusFound)
 		return
