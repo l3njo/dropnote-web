@@ -37,15 +37,13 @@ func (n *Note) ValidateGet() error {
 
 // Get returns populates the provided note with data
 func (n *Note) Get(auth string) error {
-	url := fmt.Sprintf("%snotes/%s", api, n.Voucher)
-	request, err := http.NewRequest("GET", url, nil)
+	request, err := http.NewRequest("GET", fmt.Sprintf("%snotes/%s", api, n.Voucher), nil)
 	if err != nil {
 		return err
 	}
 
 	if auth != "" {
-		auth := fmt.Sprintf("Bearer %s", auth)
-		request.Header.Add("Authorization", auth)
+		request.Header.Add("Authorization", fmt.Sprintf("Bearer %s", auth))
 	}
 
 	resp, err := http.DefaultClient.Do(request)
@@ -82,16 +80,14 @@ func (n *Note) Post(auth string) error {
 		return err
 	}
 
-	url := fmt.Sprintf("%snotes/new", api)
-	request, err := http.NewRequest("POST", url, bytes.NewBuffer(requestBody))
+	request, err := http.NewRequest("POST", fmt.Sprintf("%snotes/new", api), bytes.NewBuffer(requestBody))
 	if err != nil {
 		return err
 	}
 
 	request.Header.Set("Content-type", "application/json")
 	if auth != "" {
-		auth := fmt.Sprintf("Bearer %s", auth)
-		request.Header.Add("Authorization", auth)
+		request.Header.Add("Authorization", fmt.Sprintf("Bearer %s", auth))
 	}
 
 	resp, err := http.DefaultClient.Do(request)
@@ -112,8 +108,7 @@ func (n *Note) Post(auth string) error {
 
 // Toggle changes the provided note's visibility
 func (n *Note) Toggle(auth string) error {
-	url := fmt.Sprintf("%sme/notes/toggle/%s", api, n.Voucher)
-	request, err := http.NewRequest("PUT", url, nil)
+	request, err := http.NewRequest("PUT", fmt.Sprintf("%sme/notes/toggle/%s", api, n.Voucher), nil)
 	if err != nil {
 		return err
 	}
@@ -142,8 +137,7 @@ func (n *Note) Update(auth string) error {
 		return err
 	}
 
-	url := fmt.Sprintf("%sme/notes/update/%s", api, n.Voucher)
-	request, err := http.NewRequest("PUT", url, bytes.NewBuffer(requestBody))
+	request, err := http.NewRequest("PUT", fmt.Sprintf("%sme/notes/update/%s", api, n.Voucher), bytes.NewBuffer(requestBody))
 	if err != nil {
 		return err
 	}
@@ -167,8 +161,7 @@ func (n *Note) Update(auth string) error {
 
 // Delete deletes the provided note
 func (n *Note) Delete(auth string) error {
-	url := fmt.Sprintf("%sme/notes/delete/%s", api, n.Voucher)
-	request, err := http.NewRequest("DELETE", url, nil)
+	request, err := http.NewRequest("DELETE", fmt.Sprintf("%sme/notes/delete/%s", api, n.Voucher), nil)
 	if err != nil {
 		return err
 	}

@@ -29,6 +29,7 @@ func (a *Application) Init() {
 	a.mux.HandleFunc("/me/notes/update/", c.NoteUpdateHandler)
 	a.mux.HandleFunc("/me/notes/action", c.NoteActionsHandler)
 	a.mux.HandleFunc("/me/notes/", c.MyNotesHandler)
+	a.mux.HandleFunc("/me/action", c.MyActionsHandler)
 	a.mux.HandleFunc("/me", c.MeHandler)
 
 	a.mux.HandleFunc("/temp/qr/notes/", c.QRHandler)

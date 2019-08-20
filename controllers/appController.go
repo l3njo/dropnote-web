@@ -39,6 +39,13 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if flashes := session.Flashes(); len(flashes) > 0 {
+		for _, v := range flashes {
+			data.Flashes = append(data.Flashes, *v.(*Flash))
+		}
+	}
+
+	Handle(session.Save(r, w))
 	tmpl, err := template.ParseFiles(base, meta, body)
 	Handle(err)
 	tmpl.ExecuteTemplate(w, "layout", data)
@@ -97,8 +104,7 @@ func DropNoteHandler(w http.ResponseWriter, r *http.Request) {
 		data.Note = *note
 		session.AddFlash(Flash{Message: "Note saved.", Status: true})
 		Handle(session.Save(r, w))
-		url := fmt.Sprintf("/dropcode?voucher=%s", note.Voucher)
-		http.Redirect(w, r, url, http.StatusFound)
+		http.Redirect(w, r, fmt.Sprintf("/dropcode?voucher=%s", note.Voucher), http.StatusFound)
 		return
 	}
 

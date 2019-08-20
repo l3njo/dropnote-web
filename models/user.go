@@ -34,12 +34,11 @@ func (u *User) ValidateSignup() error {
 
 // TrySignup attempts a signup
 func (u *User) TrySignup() error {
-	url := fmt.Sprintf("%susers/new", api)
 	requestBody, err := json.Marshal(u)
 	if err != nil {
 		return err
 	}
-	resp, err := http.Post(url, "application/json", bytes.NewBuffer(requestBody))
+	resp, err := http.Post(fmt.Sprintf("%susers/new", api), "application/json", bytes.NewBuffer(requestBody))
 	if err != nil {
 		return err
 	}
@@ -57,13 +56,12 @@ func (u *User) TrySignup() error {
 
 // TryLogin attempts a login
 func (u *User) TryLogin() error {
-	url := fmt.Sprintf("%susers/login", api)
 	requestBody, err := json.Marshal(u)
 	if err != nil {
 		return err
 	}
 
-	resp, err := http.Post(url, "application/json", bytes.NewBuffer(requestBody))
+	resp, err := http.Post(fmt.Sprintf("%susers/login", api), "application/json", bytes.NewBuffer(requestBody))
 	if err != nil {
 		return err
 	}
@@ -79,15 +77,37 @@ func (u *User) TryLogin() error {
 	return nil
 }
 
+// TryDelete attempts to delete a user
+func (u *User) TryDelete() error {
+	request, err := http.NewRequest("DELETE", fmt.Sprintf("%sme/delete", api), nil)
+	if err != nil {
+		return err
+	}
+
+	request.Header.Add("Authorization", fmt.Sprintf("Bearer %s", u.Auth))
+	resp, err := http.DefaultClient.Do(request)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	result := make(map[string]interface{})
+	json.NewDecoder(resp.Body).Decode(&result)
+	if status := result["status"].(bool); !status {
+		return errors.New(result["message"].(string))
+	}
+
+	return nil
+}
+
 // TryReset attempts a password reset
 func TryReset(mail string) error {
-	url := fmt.Sprintf("%susers/actions/reset", api)
 	requestBody, err := json.Marshal(map[string]string{"mail": mail})
 	if err != nil {
 		return err
 	}
 
-	resp, err := http.Post(url, "application/json", bytes.NewBuffer(requestBody))
+	resp, err := http.Post(fmt.Sprintf("%susers/actions/reset", api), "application/json", bytes.NewBuffer(requestBody))
 	if err != nil {
 		return err
 	}

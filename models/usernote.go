@@ -17,14 +17,12 @@ type NoteSlice struct {
 // GetNotes returns an array of notes created by provided user
 func (u *User) GetNotes() ([]Note, error) {
 	notes := []Note{}
-	url := fmt.Sprintf("%sme/notes", api)
-	auth := fmt.Sprintf("Bearer %s", u.Auth)
-	request, err := http.NewRequest("GET", url, nil)
+	request, err := http.NewRequest("GET", fmt.Sprintf("%sme/notes", api), nil)
 	if err != nil {
 		return nil, err
 	}
 
-	request.Header.Add("Authorization", auth)
+	request.Header.Add("Authorization", fmt.Sprintf("Bearer %s", u.Auth))
 	resp, err := http.DefaultClient.Do(request)
 	if err != nil {
 		return nil, err
